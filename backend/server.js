@@ -5,7 +5,7 @@ import { PORT } from "./src/config/env.config.js";
 
 // Starting the server
 async function startServer() {
-    const app = createApp();
+    const app = await createApp();
 
     // Startting the server
     app.listen(PORT, () => {

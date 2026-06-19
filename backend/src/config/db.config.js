@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import { MONGO_URI } from "./env.config.js";
+import dns from "dns";
+
+// Setting custom DNS servers to avoid potential DNS resolution issues with MongoDB Atlas
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 async function connectDB() {
-    if (!MONGO_URI) {
-        throw new Error("MONGO_URI is not defined");
-    }
 
     try {
         // Keep database startup explicit so server boot fails loudly on connection errors.

@@ -1,15 +1,18 @@
 // Importing modules
-import compression from "compression";
-import cors from "cors";
 import express from "express";
-import helmet from "helmet";
-import hpp from "hpp";
-import morgan from "morgan";
+import setMiddlewares from "./middlewares/index.middleware.js";
+import connectDB from "./config/db.config.js";
 
-function createApp() {
+async function createApp() {
 
     // Making the app
     const app = express();
+
+    // Setting up middlewares
+    setMiddlewares(app);
+
+    // connecting to the database
+    await connectDB();
 
     // Making the health check route
     app.get("/health", (req, res) => {
