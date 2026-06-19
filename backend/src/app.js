@@ -1,28 +1,31 @@
 // Importing modules
 import express from "express";
 import setMiddlewares from "./middlewares/index.middleware.js";
-import connectDB from "./config/db.config.js";
+import errorHandler from "./middlewares/error.middleware.js";
+import ApiError from "./utils/ApiError.js";
+import ApiResponse from "./utils/ApiResponse.js";
 
-async function createApp() {
-
-    // Making the app
+function createApp() {
     const app = express();
 
     // Setting up middlewares
     setMiddlewares(app);
 
-    // connecting to the database
-    await connectDB();
-
     // Making the health check route
     app.get("/health", (req, res) => {
-        res.status(200).json({
-            success: true,
-            message: "Server is healthy"
-        });
+        return ApiResponse(res, 200, "Server is healthy");
     });
+
+    // Send unknown routes to the centralized error handler.
+    app.use((req, res, next) => {
+        next(new ApiError(404, `Route not found: ${req.originalUrl}`));
+    });
+
+    // Setting up error handler
+    app.use(errorHandler);
 
     return app;
 }
 
+// Exporting app creator
 export default createApp;
