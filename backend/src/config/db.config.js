@@ -1,20 +1,19 @@
 import mongoose from "mongoose";
+import { MONGO_URI } from "./env.config.js";
 
-function connectDB() {
-
-    try {
-
-        // Connect to MongoDB using the connection string from environment variables
-        mongoose.connect(process.env.MONGO_URI);
-        console.log("MongoDB connected successfully");
-
-    } catch (error) {
-
-        // Handle connection error
-        console.error("MongoDB connection failed:", error.message);
-
+async function connectDB() {
+    if (!MONGO_URI) {
+        throw new Error("MONGO_URI is not defined");
     }
 
+    try {
+        // Keep database startup explicit so server boot fails loudly on connection errors.
+        await mongoose.connect(MONGO_URI);
+        console.log("MongoDB connected successfully");
+    } catch (error) {
+        console.error("MongoDB connection failed:", error.message);
+        throw error;
+    }
 }
 
 export default connectDB;
