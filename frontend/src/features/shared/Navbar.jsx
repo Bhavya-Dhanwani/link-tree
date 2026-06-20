@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './Navbar.module.css';
 import Image from 'next/image';
+import Link from 'next/link';
 import logo from '@/assets/logo.png';
 import { useAuth } from '../auth/context/AuthContext';
 
@@ -20,7 +21,7 @@ const Navbar = () => {
             {
                 user ? (
                 <div className={styles.other}>
-                    <p className={styles.username}>{user.username}</p>
+                    <Link className={styles.username} href={`/${user.username}`}>{user.username}</Link>
                     <button className={styles.logoutBtn} onClick={logout}>Logout</button>
                 </div>
                 ) : ( "" )

@@ -15,8 +15,14 @@ async function deleteLink(linkId) {
     return response.data;
 }
 
+async function recordClick(linkId) {
+    const response = await apiClient.post(`/clicks/${linkId}`);
+    return response.data;
+}
+
 export {
     createLink,
     getLinksByUsername,
     deleteLink,
+    recordClick,
 };
