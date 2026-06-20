@@ -1,24 +1,32 @@
 // Importing modules
-import { signupService } from "../services/auth.service.js";
+import { loginService, signupService } from "../services/auth.service.js";
+import { sanitizeAuthUserResponse } from "../sanitizers/auth.sanitize.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
+import setAuthCookie from "../utils/setCookie.js";
 
 // Handling user signup
 const signupUser = asyncWrapper(async (req, res) => {
     const result = await signupService(req.body);
 
-    // setting the coookies in the response
-    res.cookie("linkters", result.token, {
+    // Setting the cookies in the response
+    setAuthCookie(res, result.token);
 
-        httpOnly: true,
-        secure: true,
-        sameSite: "Strict",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    return ApiResponse(res, 201, "User registered successfully", sanitizeAuthUserResponse(result.user));
+});
 
-    });
+// Handling user login
+const loginUser = asyncWrapper(async (req, res) => {
+    const result = await loginService(req.body);
 
-    return ApiResponse(res, 201, "User registered successfully", result.user);
+    // Setting the cookies in the response
+    setAuthCookie(res, result.token);
+
+    return ApiResponse(res, 200, "User logged in successfully", sanitizeAuthUserResponse(result.user));
 });
 
 // Exporting auth controllers
-export { signupUser };
+export {
+    loginUser,
+    signupUser
+};

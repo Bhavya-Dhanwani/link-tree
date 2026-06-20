@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema(
         name : {
             type : String,
             required : true,
-            trim : true
+            trim : true,
+            unique : [true, "User already exists with this name"]
         },
         email : {
             type : String,
@@ -41,14 +42,14 @@ userSchema.set("toJSON", {
 
 // Hashing password before saving user
 userSchema.pre("save", async function () {
-    if (!this.isModified("password")) return
+    if (!this.isModified("password")) return;
 
     this.password = await bcrypt.hash(this.password, 10);
 });
 
 // Comparing user password
 userSchema.methods.isPasswordCorrect = async function (password) {
-    return bcrypt.compare(password, this.password);
+    return bcrypt.compareSync(password, this.password);
 };
 
 // Generating single auth token
@@ -62,6 +63,7 @@ userSchema.methods.generateToken = function () {
             id : this._id,
             email : this.email
         },
+        JWT_SECRET,
         {
             expiresIn : "7d"
         }
