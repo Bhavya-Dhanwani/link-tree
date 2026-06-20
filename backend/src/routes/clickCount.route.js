@@ -1,6 +1,6 @@
 // Importing modules
 import { Router } from "express";
-import { recordClick, getClickAnalyticsByUser } from "../controllers/clickCount.controller.js";
+import { recordClick, getClickAnalyticsByUser, getClicksPerLink } from "../controllers/clickCount.controller.js";
 import protect from "../middlewares/auth.middleware.js";
 
 // Creating click count router
@@ -11,6 +11,9 @@ router.post("/:linkId", recordClick);
 
 // Getting click analytics for a user (protected)
 router.get("/user/:username", protect, getClickAnalyticsByUser);
+
+// Getting per-link click counts for a user (protected)
+router.get("/per-link/:username", protect, getClicksPerLink);
 
 // Exporting click count router
 export default router;

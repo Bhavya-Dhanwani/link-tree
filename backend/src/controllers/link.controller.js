@@ -1,5 +1,5 @@
 // Importing modules
-import { createLinkService, getLinksService, deleteLinkService, hardDeleteLinkService } from "../services/link.service.js";
+import { createLinkService, getLinksService, getAllLinksService, getDeletedLinksService, deleteLinkService, hardDeleteLinkService } from "../services/link.service.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
 
@@ -31,10 +31,34 @@ const hardDeleteLink = asyncWrapper(async (req, res) => {
     return ApiResponse(res, 200, "Link permanently deleted", link);
 });
 
+// Getting all links including soft-deleted (protected)
+const getAllLinks = asyncWrapper(async (req, res) => {
+    const links = await getAllLinksService(req.user.name);
+
+    return ApiResponse(res, 200, "Links fetched successfully", links);
+});
+
+// Getting only deleted links (protected)
+const getDeletedLinks = asyncWrapper(async (req, res) => {
+    const links = await getDeletedLinksService(req.user.name);
+
+    return ApiResponse(res, 200, "Deleted links fetched successfully", links);
+});
+
+// Getting active links for the logged-in user (protected)
+const getMyLinks = asyncWrapper(async (req, res) => {
+    const links = await getLinksService(req.user.name);
+
+    return ApiResponse(res, 200, "Links fetched successfully", links);
+});
+
 // Exporting link controllers
 export {
     createLink,
     getLinks,
+    getMyLinks,
+    getAllLinks,
+    getDeletedLinks,
     deleteLink,
     hardDeleteLink,
 };

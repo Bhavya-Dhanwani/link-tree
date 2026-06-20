@@ -6,9 +6,19 @@ async function createLink(linkData) {
     return Link.create(linkData);
 }
 
-// Finding all links by username (excluding soft-deleted)
+// Finding all active links by username (excluding soft-deleted)
 async function findLinksByUsername(username) {
     return Link.find({ username, isDeleted: false });
+}
+
+// Finding all links by username (including soft-deleted)
+async function findAllLinksByUsername(username) {
+    return Link.find({ username });
+}
+
+// Finding only deleted links by username
+async function findDeletedLinksByUsername(username) {
+    return Link.find({ username, isDeleted: true });
 }
 
 // Finding a link by ID
@@ -30,6 +40,8 @@ async function hardDeleteLinkById(id) {
 export {
     createLink,
     findLinksByUsername,
+    findAllLinksByUsername,
+    findDeletedLinksByUsername,
     findLinkById,
     softDeleteLinkById,
     hardDeleteLinkById,

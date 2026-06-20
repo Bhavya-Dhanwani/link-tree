@@ -1,5 +1,5 @@
 // Importing modules
-import { createLink, findLinksByUsername, findLinkById, softDeleteLinkById, hardDeleteLinkById } from "../dao/link.dao.js";
+import { createLink, findLinksByUsername, findAllLinksByUsername, findDeletedLinksByUsername, findLinkById, softDeleteLinkById, hardDeleteLinkById } from "../dao/link.dao.js";
 import ApiError from "../utils/ApiError.js";
 
 // Creating a new link
@@ -23,6 +23,18 @@ async function getLinksService(username) {
         throw new ApiError(404, "No links found for this user");
     }
 
+    return links;
+}
+
+// Getting all links including soft-deleted
+async function getAllLinksService(username) {
+    const links = await findAllLinksByUsername(username);
+    return links;
+}
+
+// Getting only deleted links
+async function getDeletedLinksService(username) {
+    const links = await findDeletedLinksByUsername(username);
     return links;
 }
 
@@ -62,6 +74,8 @@ async function hardDeleteLinkService(linkId, username) {
 export {
     createLinkService,
     getLinksService,
+    getAllLinksService,
+    getDeletedLinksService,
     deleteLinkService,
     hardDeleteLinkService,
 };

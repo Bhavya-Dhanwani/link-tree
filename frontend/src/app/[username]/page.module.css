@@ -81,8 +81,33 @@
     white-space: nowrap;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 320px) {
     .container {
-        margin-top: 2rem;
+        padding: 0 0.75rem;
+    }
+
+    .logo {
+        width: 30px;
+    }
+
+    .logoText {
+        font-size: 1rem;
+    }
+
+    .username {
+        font-size: 1.35rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .linkCard {
+        padding: 1rem;
+    }
+
+    .linkTitle {
+        font-size: 1rem;
+    }
+
+    .linkUrl {
+        font-size: 0.8rem;
     }
 }

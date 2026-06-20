@@ -60,6 +60,26 @@ async function getClickAnalyticsByUsername(username) {
     return { total, last24h, last7d, last30d };
 }
 
+// Getting per-link click counts for a user
+async function getClicksPerLinkByUsername(username) {
+    const result = await ClickCount.aggregate([
+        { $match: { username } },
+        { $group: { _id: "$linkId", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+    ]);
+    return result;
+}
+
+// Getting per-link click counts for a user since a date
+async function getClicksPerLinkByUsernameSince(username, since) {
+    const result = await ClickCount.aggregate([
+        { $match: { username, createdAt: { $gte: since } } },
+        { $group: { _id: "$linkId", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+    ]);
+    return result;
+}
+
 // Exporting click count DAO methods
 export {
     recordClick,
@@ -69,4 +89,6 @@ export {
     countClicksByUsernameSince,
     getClickAnalyticsByLinkId,
     getClickAnalyticsByUsername,
+    getClicksPerLinkByUsername,
+    getClicksPerLinkByUsernameSince,
 };
