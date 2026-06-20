@@ -18,6 +18,10 @@ const linkSchema = new mongoose.Schema(
             type : String,
             required : true,
             trim : true
+        },
+        isDeleted : {
+            type : Boolean,
+            default : false
         }
     },
     {
