@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { getDeletedLinks, hardDeleteLink } from "../../api/link.api";
+import { getDeletedLinks, hardDeleteLink, restoreLink } from "../../api/link.api";
 import styles from "../css/DeletedLinks.module.css";
 
 function getApiErrorMessage(error) {
@@ -40,6 +40,16 @@ function DeletedLinks() {
         }
     }
 
+    async function handleRestore(linkId) {
+        try {
+            await restoreLink(linkId);
+            setLinks((prev) => prev.filter((link) => link._id !== linkId));
+            toast.success("Link restored");
+        } catch (error) {
+            toast.error(getApiErrorMessage(error));
+        }
+    }
+
     if (isLoading) {
         return <p className={styles.loading}>Loading deleted links...</p>;
     }
@@ -56,12 +66,20 @@ function DeletedLinks() {
                         <h3 className={styles.title}>{link.title}</h3>
                         <p className={styles.url}>{link.url}</p>
                     </div>
-                    <button
-                        className={styles.deleteBtn}
-                        onClick={() => setConfirmLink(link)}
-                    >
-                        Delete Forever
-                    </button>
+                    <div className={styles.actions}>
+                        <button
+                            className={styles.restoreBtn}
+                            onClick={() => handleRestore(link._id)}
+                        >
+                            Restore
+                        </button>
+                        <button
+                            className={styles.deleteBtn}
+                            onClick={() => setConfirmLink(link)}
+                        >
+                            Delete Forever
+                        </button>
+                    </div>
                 </div>
             ))}
 

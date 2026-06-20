@@ -1,5 +1,5 @@
 // Importing modules
-import { createLink, findLinksByUsername, findAllLinksByUsername, findDeletedLinksByUsername, findLinkById, softDeleteLinkById, hardDeleteLinkById } from "../dao/link.dao.js";
+import { createLink, findLinksByUsername, findAllLinksByUsername, findDeletedLinksByUsername, findLinkById, softDeleteLinkById, hardDeleteLinkById, restoreLinkById } from "../dao/link.dao.js";
 import ApiError from "../utils/ApiError.js";
 
 // Creating a new link
@@ -70,6 +70,22 @@ async function hardDeleteLinkService(linkId, username) {
     return deletedLink;
 }
 
+// Restoring a soft-deleted link
+async function restoreLinkService(linkId, username) {
+    const link = await findLinkById(linkId);
+
+    if (!link) {
+        throw new ApiError(404, "Link not found");
+    }
+
+    if (link.username !== username) {
+        throw new ApiError(403, "You are not authorized to restore this link");
+    }
+
+    const restoredLink = await restoreLinkById(linkId);
+    return restoredLink;
+}
+
 // Exporting link services
 export {
     createLinkService,
@@ -78,4 +94,5 @@ export {
     getDeletedLinksService,
     deleteLinkService,
     hardDeleteLinkService,
+    restoreLinkService,
 };

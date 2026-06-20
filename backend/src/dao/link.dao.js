@@ -36,6 +36,11 @@ async function hardDeleteLinkById(id) {
     return Link.findByIdAndDelete(id);
 }
 
+// Restoring a soft-deleted link by ID
+async function restoreLinkById(id) {
+    return Link.findByIdAndUpdate(id, { isDeleted: false }, { new: true });
+}
+
 // Exporting link DAO methods
 export {
     createLink,
@@ -45,4 +50,5 @@ export {
     findLinkById,
     softDeleteLinkById,
     hardDeleteLinkById,
+    restoreLinkById,
 };

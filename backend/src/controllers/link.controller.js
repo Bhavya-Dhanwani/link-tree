@@ -1,5 +1,5 @@
 // Importing modules
-import { createLinkService, getLinksService, getAllLinksService, getDeletedLinksService, deleteLinkService, hardDeleteLinkService } from "../services/link.service.js";
+import { createLinkService, getLinksService, getAllLinksService, getDeletedLinksService, deleteLinkService, hardDeleteLinkService, restoreLinkService } from "../services/link.service.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
 
@@ -52,6 +52,13 @@ const getMyLinks = asyncWrapper(async (req, res) => {
     return ApiResponse(res, 200, "Links fetched successfully", links);
 });
 
+// Restoring a soft-deleted link
+const restoreLink = asyncWrapper(async (req, res) => {
+    const link = await restoreLinkService(req.params.id, req.user.name);
+
+    return ApiResponse(res, 200, "Link restored successfully", link);
+});
+
 // Exporting link controllers
 export {
     createLink,
@@ -61,4 +68,5 @@ export {
     getDeletedLinks,
     deleteLink,
     hardDeleteLink,
+    restoreLink,
 };

@@ -35,6 +35,11 @@ async function hardDeleteLink(linkId) {
     return response.data;
 }
 
+async function restoreLink(linkId) {
+    const response = await apiClient.patch(`/links/${linkId}/restore`);
+    return response.data;
+}
+
 async function recordClick(linkId) {
     const response = await apiClient.post(`/clicks/${linkId}`);
     return response.data;
@@ -59,6 +64,7 @@ export {
     getDeletedLinks,
     deleteLink,
     hardDeleteLink,
+    restoreLink,
     recordClick,
     getClickAnalytics,
     getClicksPerLink,
