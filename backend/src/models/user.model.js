@@ -61,7 +61,8 @@ userSchema.methods.generateToken = function () {
     return jwt.sign(
         {
             id : this._id,
-            email : this.email
+            email : this.email,
+            username : this.name
         },
         JWT_SECRET,
         {

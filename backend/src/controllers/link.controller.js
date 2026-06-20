@@ -1,5 +1,5 @@
 // Importing modules
-import { createLinkService } from "../services/link.service.js";
+import { createLinkService, getLinksService } from "../services/link.service.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
 
@@ -10,7 +10,15 @@ const createLink = asyncWrapper(async (req, res) => {
     return ApiResponse(res, 201, "Link created successfully", link);
 });
 
+// Getting links by username (public)
+const getLinks = asyncWrapper(async (req, res) => {
+    const links = await getLinksService(req.params.username);
+
+    return ApiResponse(res, 200, "Links fetched successfully", links);
+});
+
 // Exporting link controllers
 export {
     createLink,
+    getLinks,
 };
