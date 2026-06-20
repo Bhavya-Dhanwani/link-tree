@@ -4,6 +4,7 @@ import setMiddlewares from "./middlewares/index.middleware.js";
 import errorHandler from "./middlewares/error.middleware.js";
 import ApiError from "./utils/ApiError.js";
 import ApiResponse from "./utils/ApiResponse.js";
+import indexRouter from "./routes/index.route.js";
 
 function createApp() {
     const app = express();
@@ -15,6 +16,9 @@ function createApp() {
     app.get("/health", (req, res) => {
         return ApiResponse(res, 200, "Server is healthy");
     });
+
+    // Setting up API routes
+    app.use("/api", indexRouter);
 
     // Send unknown routes to the centralized error handler.
     app.use((req, res, next) => {
