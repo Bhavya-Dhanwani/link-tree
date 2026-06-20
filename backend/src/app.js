@@ -5,12 +5,16 @@ import errorHandler from "./middlewares/error.middleware.js";
 import ApiError from "./utils/ApiError.js";
 import ApiResponse from "./utils/ApiResponse.js";
 import indexRouter from "./routes/index.route.js";
+import morgan from "morgan";
 
 function createApp() {
     const app = express();
 
     // Setting up middlewares
     setMiddlewares(app);
+
+    // Setting up morgan for logging
+    app.use(morgan("dev"));
 
     // Making the health check route
     app.get("/health", (req, res) => {

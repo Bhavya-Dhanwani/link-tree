@@ -13,7 +13,10 @@ function setMiddlewares(app) {
     // Setting up middlewares
     app.use(helmet());
     app.use(hpp());
-    app.use(cors());
+    app.use(cors({
+        origin: process.env.CLIENT_URL || "http://localhost:3000",
+        credentials: true,
+    }));
     app.use(compression());
     app.use(express.json());
     app.use(morgan("combined"));

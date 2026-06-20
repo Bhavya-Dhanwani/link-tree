@@ -16,9 +16,15 @@ async function createUser(userData) {
     return User.create(userData);
 }
 
+// Finding user by ID
+async function findUserById(id) {
+    return User.findById(id);
+}
+
 // Exporting user DAO methods
 export {
     createUser,
     findUserByEmail,
-    findUserByEmailWithPassword
+    findUserByEmailWithPassword,
+    findUserById,
 };
