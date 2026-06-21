@@ -30,22 +30,21 @@ function useAuthForm() {
         const { name, value } = event.target;
 
         if (isLogin) {
-            setLoginForm((currentForm) => ({
-                ...currentForm,
-                [name]: value,
-            }));
+            setLoginForm((prev) => ({ ...prev, [name]: value }));
             return;
         }
 
-        setSignupForm((currentForm) => ({
-            ...currentForm,
-            [name]: value,
-        }));
+        setSignupForm((prev) => ({ ...prev, [name]: value }));
+    }
+
+    function handleCheckboxChange(event) {
+        const { name, checked } = event.target;
+        setSignupForm((prev) => ({ ...prev, [name]: checked }));
     }
 
     function switchAuthMode() {
-        setAuthMode((currentMode) => (
-            currentMode === AUTH_MODES.LOGIN ? AUTH_MODES.SIGNUP : AUTH_MODES.LOGIN
+        setAuthMode((prev) => (
+            prev === AUTH_MODES.LOGIN ? AUTH_MODES.SIGNUP : AUTH_MODES.LOGIN
         ));
     }
 
@@ -77,6 +76,7 @@ function useAuthForm() {
         isLogin,
         isSubmitting,
         handleInputChange,
+        handleCheckboxChange,
         handleSubmit,
         switchAuthMode,
     };

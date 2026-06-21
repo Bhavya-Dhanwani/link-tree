@@ -38,8 +38,11 @@ async function updateUserUsername(userId, name) {
 }
 
 // Updating user theme
-async function updateUserTheme(userId, bgColor, textColor) {
-    return User.findByIdAndUpdate(userId, { bgColor, textColor }, { new: true });
+async function updateUserTheme(userId, bgColorOrData, textColor) {
+    if (typeof bgColorOrData === "object") {
+        return User.findByIdAndUpdate(userId, bgColorOrData, { new: true });
+    }
+    return User.findByIdAndUpdate(userId, { bgColor: bgColorOrData, textColor }, { new: true });
 }
 
 // Creating a password reset token

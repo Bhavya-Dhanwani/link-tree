@@ -7,6 +7,7 @@ import lightLogo from "@/assets/lightLogo.png";
 import styles from "../css/ProfilePage.module.css";
 
 function isColorDark(hex) {
+    if (!hex) return false;
     const c = hex.replace("#", "");
     const r = parseInt(c.substring(0, 2), 16);
     const g = parseInt(c.substring(2, 4), 16);
@@ -15,14 +16,40 @@ function isColorDark(hex) {
     return luminance < 0.5;
 }
 
-function ProfileHeader({ bgColor, textColor }) {
+function ProfileHeader({ bgColor, textColor, customLogo, customName, removeLinkterBranding }) {
     const useLightLogo = bgColor && isColorDark(bgColor);
-    const logoSrc = useLightLogo ? lightLogo : darkLogo;
     const logoTextColor = textColor || "#333";
+
+    if (removeLinkterBranding) {
+        return (
+            <div className={styles.header} style={{ justifyContent: "center", gap: 12 }}>
+                {customLogo && (
+                    <Image
+                        src={customLogo}
+                        alt={customName || "Brand"}
+                        width={40}
+                        height={40}
+                        unoptimized
+                        style={{ borderRadius: 8, objectFit: "cover" }}
+                    />
+                )}
+                {customName && (
+                    <h2 className={styles.logoText} style={{ color: logoTextColor }}>{customName}</h2>
+                )}
+                {!customName && !customLogo && (
+                    <h2 className={styles.logoText} style={{ color: logoTextColor }}>My Links</h2>
+                )}
+            </div>
+        );
+    }
 
     return (
         <Link className={styles.header} href="/">
-            <Image alt="Logo of linkter" src={logoSrc} className={styles.logo} />
+            <Image
+                alt="Logo of linkter"
+                src={useLightLogo ? lightLogo : darkLogo}
+                className={styles.logo}
+            />
             <h2 className={styles.logoText} style={{ color: logoTextColor }}>Linkter</h2>
         </Link>
     );

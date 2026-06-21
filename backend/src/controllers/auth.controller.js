@@ -1,5 +1,5 @@
 // Importing modules
-import { loginService, signupService, checkUsernameService, getImageKitAuth, updateProfilePictureService, updateUsernameService, getCurrentUserService, updateThemeService, getPublicUserThemeService, forgotPasswordService, resetPasswordService } from "../services/auth.service.js";
+import { loginService, signupService, checkUsernameService, getImageKitAuth, updateProfilePictureService, updateUsernameService, getCurrentUserService, updateThemeService, getPublicUserThemeService, forgotPasswordService, resetPasswordService, updateBrandService, getPublicProfileService } from "../services/auth.service.js";
 import { sanitizeAuthUserResponse } from "../sanitizers/auth.sanitize.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
@@ -94,11 +94,19 @@ const forgotPassword = asyncWrapper(async (req, res) => {
 // Resetting password with token
 const resetPassword = asyncWrapper(async (req, res) => {
     const result = await resetPasswordService(req.params.token, req.body.password);
-
     return ApiResponse(res, 200, result.message);
 });
 
-// Exporting auth controllers
+const updateBrand = asyncWrapper(async (req, res) => {
+    const user = await updateBrandService(req.user.id, req.body);
+    return ApiResponse(res, 200, "Brand settings updated", sanitizeAuthUserResponse(user));
+});
+
+const getPublicProfile = asyncWrapper(async (req, res) => {
+    const data = await getPublicProfileService(req.params.username);
+    return ApiResponse(res, 200, "Profile fetched", data);
+});
+
 export {
     loginUser,
     signupUser,
@@ -112,4 +120,6 @@ export {
     getPublicUserTheme,
     forgotPassword,
     resetPassword,
+    updateBrand,
+    getPublicProfile,
 };

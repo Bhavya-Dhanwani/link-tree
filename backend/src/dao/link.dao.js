@@ -53,13 +53,15 @@ async function reorderLinks(updates) {
     return Link.bulkWrite(bulkOps);
 }
 
-// Getting max order for a user
 async function getMaxOrder(username) {
     const result = await Link.findOne({ username }).sort({ order: -1 }).select("order");
     return result ? result.order : -1;
 }
 
-// Exporting link DAO methods
+async function updateLinkById(id, updateData) {
+    return Link.findByIdAndUpdate(id, updateData, { new: true });
+}
+
 export {
     createLink,
     findLinksByUsername,
@@ -71,4 +73,5 @@ export {
     restoreLinkById,
     reorderLinks,
     getMaxOrder,
+    updateLinkById,
 };

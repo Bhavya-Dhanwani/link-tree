@@ -6,32 +6,26 @@ import { IMAGEKIT_PRIVATE_KEY } from "../config/env.config.js";
 import crypto from "crypto";
 import sendMail from "../utils/sendMail.js";
 import { passwordResetEmailTemplate, buildResetUrl } from "../utils/emailTemplate.js";
+import isPremiumUser from "../utils/isPremiumUser.js";
 
-// Creating signup service
 async function signupService(payload = {}) {
-    const { name, email, password } = payload;
+    const { name, email, password, privacyPolicyAccepted, termsAccepted } = payload;
 
-    // Checking existing user
     const existingUser = await findUserByEmail(email);
-
     if (existingUser) {
         throw new ApiError(409, "User already exists with this email");
     }
 
-    // Creating new user
     const user = await createUser({
         name,
         email,
-        password
+        password,
+        privacyPolicyAccepted: privacyPolicyAccepted === true || privacyPolicyAccepted === "true",
+        termsAccepted: termsAccepted === true || termsAccepted === "true",
     });
 
-    // Creating single auth token
     const token = user.generateToken();
-
-    return {
-        user,
-        token
-    };
+    return { user, token };
 }
 
 // Creating login service
@@ -274,8 +268,31 @@ async function resetPasswordService(token, newPassword) {
 
     return { message: "Password reset successfully" };
 }
+async function updateBrandService(userId, payload) {
+    const { customLogo, customName, removeLinkterBranding } = payload;
+    const updateData = {};
+    if (customLogo !== undefined) updateData.customLogo = customLogo;
+    if (customName !== undefined) updateData.customName = customName;
+    if (removeLinkterBranding !== undefined) updateData.removeLinkterBranding = removeLinkterBranding;
+    return updateUserTheme(userId, updateData);
+}
 
-// Exporting auth services
+async function getPublicProfileService(username) {
+    const user = await findUserByName(username);
+    if (!user) throw new ApiError(404, "User not found");
+    const premium = await isPremiumUser(user._id);
+    return {
+        username: user.name,
+        profilePicture: user.profilePicture || "",
+        bgColor: user.bgColor || "#ffffff",
+        textColor: user.textColor || "#333333",
+        customLogo: user.customLogo || "",
+        customName: user.customName || "",
+        removeLinkterBranding: premium && user.removeLinkterBranding,
+        isPremium: premium,
+    };
+}
+
 export {
     loginService,
     signupService,
@@ -288,4 +305,6 @@ export {
     getPublicUserThemeService,
     forgotPasswordService,
     resetPasswordService,
+    updateBrandService,
+    getPublicProfileService,
 };

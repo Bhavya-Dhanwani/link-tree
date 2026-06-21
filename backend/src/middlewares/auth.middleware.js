@@ -18,6 +18,7 @@ const protect = asyncWrapper(async (req, res, next) => {
         id: decoded.id,
         email: decoded.email,
         name: decoded.username,
+        role: decoded.role,
     };
 
     next();

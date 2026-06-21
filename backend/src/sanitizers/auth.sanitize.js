@@ -1,29 +1,28 @@
-// Sanitizing signup request body
 function sanitizeSignup(req, _res, next) {
-    const { name, email, password } = req.body;
+    const { name, email, password, privacyPolicyAccepted, termsAccepted } = req.body;
 
     req.body = {
         name: name.trim(),
         email: email.toLowerCase().trim(),
-        password
+        password,
+        privacyPolicyAccepted,
+        termsAccepted,
     };
 
     return next();
 }
 
-// Sanitizing login request body
 function sanitizeLogin(req, _res, next) {
     const { email, password } = req.body;
 
     req.body = {
         email: email.toLowerCase().trim(),
-        password
+        password,
     };
 
     return next();
 }
 
-// Sanitizing auth user response
 function sanitizeAuthUserResponse(user) {
     return {
         username: user.name,
@@ -31,12 +30,11 @@ function sanitizeAuthUserResponse(user) {
         profilePicture: user.profilePicture || "",
         bgColor: user.bgColor || "#ffffff",
         textColor: user.textColor || "#333333",
+        role: user.role || "user",
+        customLogo: user.customLogo || "",
+        customName: user.customName || "",
+        removeLinkterBranding: user.removeLinkterBranding || false,
     };
 }
 
-// Exporting auth sanitizers
-export {
-    sanitizeAuthUserResponse,
-    sanitizeLogin,
-    sanitizeSignup
-};
+export { sanitizeAuthUserResponse, sanitizeLogin, sanitizeSignup };

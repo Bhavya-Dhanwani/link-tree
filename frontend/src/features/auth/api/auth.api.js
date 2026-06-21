@@ -60,6 +60,11 @@ async function resetPassword(token, password) {
     return response.data;
 }
 
+async function getPublicProfile(username) {
+    const response = await apiClient.get(`/auth/profile/${username}`);
+    return response.data;
+}
+
 export {
     loginUser,
     signupUser,
@@ -73,4 +78,5 @@ export {
     getPublicUserTheme,
     forgotPassword,
     resetPassword,
+    getPublicProfile,
 };

@@ -1,16 +1,13 @@
-// Importing modules
 import { body } from "express-validator";
 
-// Reserved usernames that cannot be used
 const RESERVED_USERNAMES = [
     "admin", "api", "login", "signup", "auth", "dashboard",
     "settings", "profile", "user", "users", "link", "links",
     "clicks", "analytics", "health", "test", "root", "system",
+    "premium", "pro", "upgrade", "pricing",
 ];
 
-// Validating signup request body
 const signupValidator = [
-
     body("name")
         .trim()
         .notEmpty()
@@ -36,11 +33,17 @@ const signupValidator = [
     body("password")
         .isLength({ min: 6 })
         .withMessage("Password must be at least 6 characters long"),
+
+    body("privacyPolicyAccepted")
+        .equals("true")
+        .withMessage("You must accept the Privacy Policy"),
+
+    body("termsAccepted")
+        .equals("true")
+        .withMessage("You must accept the Terms & Conditions"),
 ];
 
-// Validating login request body
 const loginValidator = [
-
     body("email")
         .trim()
         .notEmpty()
@@ -53,8 +56,4 @@ const loginValidator = [
         .withMessage("Password cannot be empty"),
 ];
 
-// Exporting auth validators
-export {
-    loginValidator,
-    signupValidator
-};
+export { loginValidator, signupValidator };

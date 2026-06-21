@@ -12,6 +12,8 @@ const SIGNUP_FORM_INITIAL_STATE = {
     name: "",
     email: "",
     password: "",
+    privacyPolicyAccepted: false,
+    termsAccepted: false,
 };
 
 export {

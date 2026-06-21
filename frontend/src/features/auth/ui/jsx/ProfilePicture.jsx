@@ -6,10 +6,12 @@ import useProfilePictureUpload from "../../hooks/useProfilePictureUpload";
 import { useAuth } from "../../context/AuthContext";
 import styles from "../css/ProfilePicture.module.css";
 
-function ProfilePicture({ isOwner }) {
+function ProfilePicture({ isOwner, profileUser }) {
     const { user } = useAuth();
     const { upload, isUploading } = useProfilePictureUpload();
     const fileInputRef = useRef(null);
+
+    const displayUser = isOwner ? user : profileUser;
 
     function handleClick() {
         if (isOwner) {
@@ -41,13 +43,13 @@ function ProfilePicture({ isOwner }) {
                 className={styles.avatarBtn}
                 onClick={handleClick}
                 disabled={isUploading}
-                title={user?.username}
+                title={displayUser?.username}
                 style={{ cursor: isOwner ? "pointer" : "default" }}
             >
-                {user?.profilePicture ? (
+                {displayUser?.profilePicture ? (
                     <Image
-                        src={user.profilePicture}
-                        alt={user.username}
+                        src={displayUser.profilePicture}
+                        alt={displayUser.username}
                         width={80}
                         height={80}
                         unoptimized
@@ -55,7 +57,7 @@ function ProfilePicture({ isOwner }) {
                     />
                 ) : (
                     <span className={styles.initial}>
-                        {user?.username?.[0]?.toUpperCase() || "?"}
+                        {displayUser?.username?.[0]?.toUpperCase() || "?"}
                     </span>
                 )}
             </button>

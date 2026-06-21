@@ -33,12 +33,16 @@ function AuthPanel() {
         isLogin,
         isSubmitting,
         handleInputChange,
+        handleCheckboxChange,
         handleSubmit,
         switchAuthMode,
     } = useAuthForm();
 
     const { status: usernameStatus, formatError } = useUsernameCheck(formValues.name);
     const usernameHint = isLogin ? null : getUsernameHint(usernameStatus, formatError);
+
+    const allChecked = formValues.privacyPolicyAccepted && formValues.termsAccepted;
+    const canSubmit = isSubmitting || (!isLogin && (usernameStatus === "taken" || usernameStatus === "invalid")) || (!isLogin && !allChecked);
 
     return (
         <AuthWrapper>
@@ -91,7 +95,38 @@ function AuthPanel() {
                     onChange={handleInputChange}
                 />
 
-                <AuthButton disabled={isSubmitting || (!isLogin && (usernameStatus === "taken" || usernameStatus === "invalid"))} type="submit">
+                {!isLogin && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4, marginBottom: 8 }}>
+                        <label style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: "0.82rem", color: "#64718a", cursor: "pointer" }}>
+                            <input
+                                type="checkbox"
+                                name="privacyPolicyAccepted"
+                                checked={formValues.privacyPolicyAccepted}
+                                onChange={handleCheckboxChange}
+                                style={{ marginTop: 3, accentColor: "#4f46e5" }}
+                            />
+                            <span>
+                                I agree to the{" "}
+                                <Link href="/privacy-policy" target="_blank" style={{ color: "#4f46e5", textDecoration: "none" }}>Privacy Policy</Link>
+                            </span>
+                        </label>
+                        <label style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: "0.82rem", color: "#64718a", cursor: "pointer" }}>
+                            <input
+                                type="checkbox"
+                                name="termsAccepted"
+                                checked={formValues.termsAccepted}
+                                onChange={handleCheckboxChange}
+                                style={{ marginTop: 3, accentColor: "#4f46e5" }}
+                            />
+                            <span>
+                                I agree to the{" "}
+                                <Link href="/terms" target="_blank" style={{ color: "#4f46e5", textDecoration: "none" }}>Terms &amp; Conditions</Link>
+                            </span>
+                        </label>
+                    </div>
+                )}
+
+                <AuthButton disabled={canSubmit} type="submit">
                     {isSubmitting ? "Please wait" : isLogin ? "Log in" : "Sign up"}
                 </AuthButton>
             </form>

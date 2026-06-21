@@ -87,6 +87,38 @@
     background-color: #ff6b81;
 }
 
+.upgradeBtn {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.upgradeBtn:hover {
+    opacity: 0.9;
+}
+
+.adminBtn {
+    background: #101b31;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.adminBtn:hover {
+    background: #1e293b;
+}
+
 @media (max-width: 320px) {
     .nav {
         padding: 0.75rem 1rem;

@@ -14,11 +14,11 @@ function ProfilePage() {
     const { username } = useParams();
     const { user } = useAuth();
     const { links, isLoading: linksLoading, error } = useProfileLinks(username);
-    const { theme, isLoading: themeLoading } = usePublicProfile(username);
+    const { profile, isLoading: themeLoading } = usePublicProfile(username);
     const isOwner = user?.username === username;
 
-    const bgColor = theme?.bgColor || "#ffffff";
-    const textColor = theme?.textColor || "#333333";
+    const bgColor = profile?.bgColor || "#ffffff";
+    const textColor = profile?.textColor || "#333333";
 
     if (linksLoading || themeLoading) {
         return (
@@ -34,9 +34,15 @@ function ProfilePage() {
         return (
             <div className={styles.container} style={{ background: bgColor, color: textColor }}>
                 <div className={styles.inner}>
-                    <ProfileHeader bgColor={bgColor} textColor={textColor} />
+                    <ProfileHeader
+                        bgColor={bgColor}
+                        textColor={textColor}
+                        customLogo={profile?.customLogo}
+                        customName={profile?.customName}
+                        removeLinkterBranding={profile?.removeLinkterBranding}
+                    />
                     <div className={styles.profileRow}>
-                        <ProfilePicture isOwner={isOwner} />
+                        <ProfilePicture isOwner={isOwner} profileUser={profile} />
                         <ProfileUsername username={username} textColor={textColor} />
                     </div>
                     <p className={styles.error}>{error}</p>
@@ -48,9 +54,15 @@ function ProfilePage() {
     return (
         <div className={styles.container} style={{ background: bgColor, color: textColor }}>
             <div className={styles.inner}>
-                <ProfileHeader bgColor={bgColor} textColor={textColor} />
+                <ProfileHeader
+                    bgColor={bgColor}
+                    textColor={textColor}
+                    customLogo={profile?.customLogo}
+                    customName={profile?.customName}
+                    removeLinkterBranding={profile?.removeLinkterBranding}
+                />
                 <div className={styles.profileRow}>
-                    <ProfilePicture isOwner={isOwner} />
+                    <ProfilePicture isOwner={isOwner} profileUser={profile} />
                     <ProfileUsername username={username} textColor={textColor} />
                 </div>
                 <ProfileLinks links={links} textColor={textColor} />

@@ -1,10 +1,11 @@
 // Importing modules
-import { createLink, findLinksByUsername, findAllLinksByUsername, findDeletedLinksByUsername, findLinkById, softDeleteLinkById, hardDeleteLinkById, restoreLinkById, reorderLinks, getMaxOrder } from "../dao/link.dao.js";
+import { createLink, findLinksByUsername, findAllLinksByUsername, findDeletedLinksByUsername, findLinkById, softDeleteLinkById, hardDeleteLinkById, restoreLinkById, reorderLinks, getMaxOrder, updateLinkById } from "../dao/link.dao.js";
 import ApiError from "../utils/ApiError.js";
+import { getPlatformFromUrl } from "../utils/platformIcons.js";
 
 // Creating a new link
 async function createLinkService(payload = {}, username) {
-    const { title, url } = payload;
+    const { title, url, borderColor } = payload;
 
     const maxOrder = await getMaxOrder(username);
 
@@ -13,6 +14,7 @@ async function createLinkService(payload = {}, username) {
         url,
         username,
         order: maxOrder + 1,
+        borderColor: borderColor || "#4f46e5",
     });
 
     return link;
@@ -108,7 +110,35 @@ async function reorderLinkService(username, orderedIds) {
     return await findLinksByUsername(username);
 }
 
-// Exporting link services
+async function updateLinkStyleService(linkId, username, payload) {
+    const link = await findLinkById(linkId);
+    if (!link) throw new ApiError(404, "Link not found");
+    if (link.username !== username) throw new ApiError(403, "Not authorized");
+
+    const { platformIcon, customIcon, borderColor, borderWidth, isHighlighted, highlightExpiresAt } = payload;
+    const updateData = {};
+
+    if (platformIcon !== undefined) updateData.platformIcon = platformIcon;
+    if (customIcon !== undefined) updateData.customIcon = customIcon;
+    if (borderColor !== undefined) updateData.borderColor = borderColor;
+    if (borderWidth !== undefined) updateData.borderWidth = borderWidth;
+    if (isHighlighted !== undefined) updateData.isHighlighted = isHighlighted;
+    if (highlightExpiresAt !== undefined) updateData.highlightExpiresAt = highlightExpiresAt;
+
+    return updateLinkById(linkId, updateData);
+}
+
+async function highlightLinkService(linkId, username, expiresAt) {
+    const link = await findLinkById(linkId);
+    if (!link) throw new ApiError(404, "Link not found");
+    if (link.username !== username) throw new ApiError(403, "Not authorized");
+
+    return updateLinkById(linkId, {
+        isHighlighted: true,
+        highlightExpiresAt: expiresAt || null,
+    });
+}
+
 export {
     createLinkService,
     getLinksService,
@@ -118,4 +148,6 @@ export {
     hardDeleteLinkService,
     restoreLinkService,
     reorderLinkService,
+    updateLinkStyleService,
+    highlightLinkService,
 };

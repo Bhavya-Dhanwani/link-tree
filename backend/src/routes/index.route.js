@@ -1,20 +1,18 @@
-// Importing modules
 import { Router } from "express";
 import authRouter from "./auth.route.js";
 import linkRouter from "./link.route.js";
 import clickCountRouter from "./clickCount.route.js";
+import paymentRouter from "./payment.route.js";
+import platformRouter from "./platform.route.js";
+import faviconRouter from "./favicon.route.js";
 
-// Creating main router
 const router = Router();
 
-// Setting up auth routes
 router.use("/auth", authRouter);
-
-// Setting up link routes
 router.use("/links", linkRouter);
-
-// Setting up click count routes
 router.use("/clicks", clickCountRouter);
+router.use("/payments", paymentRouter);
+router.use("/platforms", platformRouter);
+router.use("/favicon", faviconRouter);
 
-// Exporting main router
 export default router;

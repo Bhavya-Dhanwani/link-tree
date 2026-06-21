@@ -1,7 +1,61 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import useLinkForm from "../../hooks/useLinkForm";
 import styles from "../css/DashboardForm.module.css";
+
+const PLATFORM_COLORS = {
+    youtube: "#FF0000",
+    instagram: "#E4405F",
+    x: "#000000",
+    twitter: "#000000",
+    facebook: "#1877F2",
+    telegram: "#26A5E4",
+    reddit: "#FF4500",
+    github: "#333333",
+    linkedin: "#0A66C2",
+    discord: "#5865F2",
+    tiktok: "#000000",
+    spotify: "#1DB954",
+    twitch: "#9146FF",
+    threads: "#000000",
+    pinterest: "#BD081C",
+    whatsapp: "#25D366",
+    medium: "#000000",
+    dribbble: "#EA4C89",
+};
+
+function getPlatformFromUrl(url) {
+    try {
+        const hostname = new URL(url).hostname.toLowerCase().replace("www.", "");
+        const map = {
+            "youtube.com": "youtube", "youtu.be": "youtube",
+            "instagram.com": "instagram", "twitter.com": "twitter",
+            "x.com": "x", "facebook.com": "facebook", "fb.com": "facebook",
+            "telegram.org": "telegram", "t.me": "telegram",
+            "reddit.com": "reddit", "github.com": "github",
+            "linkedin.com": "linkedin", "discord.com": "discord",
+            "tiktok.com": "tiktok", "spotify.com": "spotify",
+            "twitch.tv": "twitch", "threads.net": "threads",
+            "dribbble.com": "dribbble", "medium.com": "medium",
+            "pinterest.com": "pinterest", "wa.me": "whatsapp",
+            "whatsapp.com": "whatsapp",
+        };
+        for (const [domain, platform] of Object.entries(map)) {
+            if (hostname.includes(domain)) return platform;
+        }
+    } catch {}
+    return null;
+}
+
+function getFaviconUrl(url) {
+    try {
+        const hostname = new URL(url).hostname;
+        return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
+    } catch {
+        return null;
+    }
+}
 
 function DashboardForm() {
     const {
@@ -10,6 +64,10 @@ function DashboardForm() {
         handleInputChange,
         handleSubmit,
     } = useLinkForm();
+
+    const platform = form.url ? getPlatformFromUrl(form.url) : null;
+    const favicon = form.url ? getFaviconUrl(form.url) : null;
+    const platformColor = platform ? PLATFORM_COLORS[platform] : "#4f46e5";
 
     return (
         <div className={styles.container}>
@@ -40,6 +98,45 @@ function DashboardForm() {
                         onChange={handleInputChange}
                     />
                 </div>
+
+                {form.url && (
+                    <div className={styles.field}>
+                        <label className={styles.label}>Preview</label>
+                        <div style={{
+                            display: "flex", alignItems: "center", gap: 10,
+                            padding: "10px 14px", border: `2px solid ${platformColor}`,
+                            borderRadius: 8, background: "#fff",
+                        }}>
+                            {favicon ? (
+                                <img src={favicon} alt="" width={20} height={20} style={{ borderRadius: 4 }} />
+                            ) : (
+                                <div style={{
+                                    width: 20, height: 20, borderRadius: 4,
+                                    background: "#e2e8f0", display: "flex",
+                                    alignItems: "center", justifyContent: "center",
+                                    fontSize: 10, color: "#94a3b8",
+                                }}>?</div>
+                            )}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ fontSize: 14, fontWeight: 600, color: "#101b31", margin: 0 }}>
+                                    {form.title || "Link title"}
+                                </p>
+                                <p style={{ fontSize: 12, color: "#94a3b8", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {form.url}
+                                </p>
+                            </div>
+                            {platform && (
+                                <span style={{
+                                    fontSize: 11, fontWeight: 600, color: platformColor,
+                                    background: `${platformColor}15`, padding: "2px 8px",
+                                    borderRadius: 10, whiteSpace: "nowrap",
+                                }}>
+                                    {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 <button
                     className={styles.button}

@@ -1,38 +1,59 @@
-// Importing modules
 import mongoose from "mongoose";
 
-// Defining the link schema
 const linkSchema = new mongoose.Schema(
     {
-        title : {
-            type : String,
-            required : true,
-            trim : true
+        title: {
+            type: String,
+            required: true,
+            trim: true,
         },
-        url : {
-            type : String,
-            required : true,
-            trim : true
+        url: {
+            type: String,
+            required: true,
+            trim: true,
         },
-        username : {
-            type : String,
-            required : true,
-            trim : true
+        username: {
+            type: String,
+            required: true,
+            trim: true,
         },
-        order : {
-            type : Number,
-            default : 0
+        order: {
+            type: Number,
+            default: 0,
         },
-        isDeleted : {
-            type : Boolean,
-            default : false
-        }
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
+        isHighlighted: {
+            type: Boolean,
+            default: false,
+        },
+        highlightExpiresAt: {
+            type: Date,
+            default: null,
+        },
+        platformIcon: {
+            type: String,
+            default: "",
+        },
+        customIcon: {
+            type: String,
+            default: "",
+        },
+        borderColor: {
+            type: String,
+            default: "",
+        },
+        borderWidth: {
+            type: Number,
+            default: 0,
+        },
     },
     {
-        timestamps : true
+        timestamps: true,
     }
 );
 
-// Exporting the link model
 const Link = mongoose.model("Link", linkSchema);
 export default Link;
