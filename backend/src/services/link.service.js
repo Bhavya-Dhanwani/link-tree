@@ -1,15 +1,18 @@
 // Importing modules
-import { createLink, findLinksByUsername, findAllLinksByUsername, findDeletedLinksByUsername, findLinkById, softDeleteLinkById, hardDeleteLinkById, restoreLinkById } from "../dao/link.dao.js";
+import { createLink, findLinksByUsername, findAllLinksByUsername, findDeletedLinksByUsername, findLinkById, softDeleteLinkById, hardDeleteLinkById, restoreLinkById, reorderLinks, getMaxOrder } from "../dao/link.dao.js";
 import ApiError from "../utils/ApiError.js";
 
 // Creating a new link
 async function createLinkService(payload = {}, username) {
     const { title, url } = payload;
 
+    const maxOrder = await getMaxOrder(username);
+
     const link = await createLink({
         title,
         url,
         username,
+        order: maxOrder + 1,
     });
 
     return link;
@@ -86,6 +89,25 @@ async function restoreLinkService(linkId, username) {
     return restoredLink;
 }
 
+// Reordering links
+async function reorderLinkService(username, orderedIds) {
+    const links = await findLinksByUsername(username);
+    const linkMap = {};
+    links.forEach((link) => {
+        linkMap[link._id.toString()] = link.username;
+    });
+
+    const updates = orderedIds.map((id, index) => {
+        if (linkMap[id] !== username) {
+            throw new ApiError(403, "You are not authorized to reorder this link");
+        }
+        return { id, order: index };
+    });
+
+    await reorderLinks(updates);
+    return await findLinksByUsername(username);
+}
+
 // Exporting link services
 export {
     createLinkService,
@@ -95,4 +117,5 @@ export {
     deleteLinkService,
     hardDeleteLinkService,
     restoreLinkService,
+    reorderLinkService,
 };

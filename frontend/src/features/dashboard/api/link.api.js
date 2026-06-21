@@ -62,6 +62,11 @@ async function getClickTimeline(username, time) {
     return response.data;
 }
 
+async function reorderLinks(orderedIds) {
+    const response = await apiClient.put("/links/reorder", { orderedIds });
+    return response.data;
+}
+
 export {
     createLink,
     getLinksByUsername,
@@ -75,4 +80,5 @@ export {
     getClickAnalytics,
     getClicksPerLink,
     getClickTimeline,
+    reorderLinks,
 };

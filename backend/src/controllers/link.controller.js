@@ -1,5 +1,5 @@
 // Importing modules
-import { createLinkService, getLinksService, getAllLinksService, getDeletedLinksService, deleteLinkService, hardDeleteLinkService, restoreLinkService } from "../services/link.service.js";
+import { createLinkService, getLinksService, getAllLinksService, getDeletedLinksService, deleteLinkService, hardDeleteLinkService, restoreLinkService, reorderLinkService } from "../services/link.service.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
 
@@ -59,6 +59,13 @@ const restoreLink = asyncWrapper(async (req, res) => {
     return ApiResponse(res, 200, "Link restored successfully", link);
 });
 
+// Reordering links
+const reorderLinks = asyncWrapper(async (req, res) => {
+    const links = await reorderLinkService(req.user.name, req.body.orderedIds);
+
+    return ApiResponse(res, 200, "Links reordered successfully", links);
+});
+
 // Exporting link controllers
 export {
     createLink,
@@ -69,4 +76,5 @@ export {
     deleteLink,
     hardDeleteLink,
     restoreLink,
+    reorderLinks,
 };

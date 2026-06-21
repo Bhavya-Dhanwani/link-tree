@@ -1,6 +1,6 @@
 // Importing modules
 import { Router } from "express";
-import { createLink, getLinks, getMyLinks, getAllLinks, getDeletedLinks, deleteLink, hardDeleteLink, restoreLink } from "../controllers/link.controller.js";
+import { createLink, getLinks, getMyLinks, getAllLinks, getDeletedLinks, deleteLink, hardDeleteLink, restoreLink, reorderLinks } from "../controllers/link.controller.js";
 import validateErrors from "../middlewares/validateErrors.middleware.js";
 import protect from "../middlewares/auth.middleware.js";
 import { createLinkValidator } from "../validators/link.validate.js";
@@ -31,6 +31,9 @@ router.delete("/:id/hard", protect, hardDeleteLink);
 
 // Restoring a soft-deleted link (protected)
 router.patch("/:id/restore", protect, restoreLink);
+
+// Reordering links (protected)
+router.put("/reorder", protect, reorderLinks);
 
 // Exporting link router
 export default router;
