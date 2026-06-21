@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
 import useProfileLinks from "../../hooks/useProfileLinks";
 import usePublicProfile from "../../hooks/usePublicProfile";
 import ProfileHeader from "./ProfileHeader";
@@ -8,6 +9,7 @@ import ProfileUsername from "./ProfileUsername";
 import ProfileLinks from "./ProfileLinks";
 import ProfilePicture from "@/features/auth/ui/jsx/ProfilePicture";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { recordProfileVisit } from "@/features/dashboard/api/link.api";
 import styles from "../css/ProfilePage.module.css";
 
 function ProfilePage() {
@@ -16,6 +18,12 @@ function ProfilePage() {
     const { links, isLoading: linksLoading, error } = useProfileLinks(username);
     const { profile, isLoading: themeLoading } = usePublicProfile(username);
     const isOwner = user?.username === username;
+
+    useEffect(() => {
+        if (username) {
+            recordProfileVisit(username).catch(() => {});
+        }
+    }, [username]);
 
     const bgColor = profile?.bgColor || "#ffffff";
     const textColor = profile?.textColor || "#333333";

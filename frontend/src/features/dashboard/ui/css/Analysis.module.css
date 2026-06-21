@@ -106,7 +106,12 @@
     }
 
     .stats {
-        grid-template-columns: repeat(2, 1fr);
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .stat {
+        min-width: calc(50% - 0.5rem);
     }
 }
 

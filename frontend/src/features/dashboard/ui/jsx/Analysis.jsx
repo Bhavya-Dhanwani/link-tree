@@ -15,7 +15,7 @@ import {
 import { Pie, Line } from "react-chartjs-2";
 import { toast } from "react-toastify";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import { getClicksPerLink, getClickTimeline } from "../../api/link.api";
+import { getClicksPerLink, getClickTimeline, getProfileVisitAnalytics, getProfileVisitTimeline } from "../../api/link.api";
 import styles from "../css/Analysis.module.css";
 
 ChartJS.register(ArcElement, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler);
@@ -52,18 +52,24 @@ function Analysis() {
     const { user } = useAuth();
     const [pieData, setPieData] = useState([]);
     const [timelineData, setTimelineData] = useState({ times: [], links: [] });
+    const [visitData, setVisitData] = useState({ total: 0, last24h: 0, last7d: 0, last30d: 0 });
+    const [visitTimeline, setVisitTimeline] = useState({ times: [], data: [] });
     const [selected, setSelected] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const [perLinkRes, timelineRes] = await Promise.all([
+                const [perLinkRes, timelineRes, visitAnalyticsRes, visitTimelineRes] = await Promise.all([
                     getClicksPerLink(user.username, selected),
                     getClickTimeline(user.username, selected),
+                    getProfileVisitAnalytics(user.username),
+                    getProfileVisitTimeline(user.username, selected),
                 ]);
                 setPieData(perLinkRes.data);
                 setTimelineData(timelineRes.data);
+                setVisitData(visitAnalyticsRes.data);
+                setVisitTimeline(visitTimelineRes.data);
             } catch (error) {
                 toast.error(getApiErrorMessage(error));
             } finally {
@@ -149,6 +155,23 @@ function Analysis() {
     };
 
     const totalClicks = pieData.reduce((sum, d) => sum + d.count, 0);
+    const hasVisitTimeline = visitTimeline.times.length > 0;
+
+    const visitLineData = {
+        labels: visitTimeline.times.map((t) => formatTimeLabel(t, selected)),
+        datasets: [
+            {
+                label: "Profile Views",
+                data: visitTimeline.data,
+                borderColor: "#8b5cf6",
+                backgroundColor: "#8b5cf620",
+                fill: true,
+                tension: 0.3,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+            },
+        ],
+    };
 
     return (
         <div className={styles.container}>
@@ -186,6 +209,15 @@ function Analysis() {
                 </div>
             )}
 
+            {hasVisitTimeline && (
+                <div className={styles.lineChartWrap}>
+                    <h3 className={styles.sectionTitle}>Profile Views Over Time</h3>
+                    <div className={styles.lineChart}>
+                        <Line data={visitLineData} options={lineChartOptions} />
+                    </div>
+                </div>
+            )}
+
             {hasPieData && (
                 <div className={styles.stats}>
                     <div className={styles.stat}>
@@ -195,6 +227,10 @@ function Analysis() {
                     <div className={styles.stat}>
                         <span className={styles.statLabel}>Links</span>
                         <span className={styles.statValue}>{pieData.length}</span>
+                    </div>
+                    <div className={styles.stat}>
+                        <span className={styles.statLabel}>Total Views</span>
+                        <span className={styles.statValue}>{visitData.total}</span>
                     </div>
                 </div>
             )}

@@ -67,6 +67,22 @@ async function reorderLinks(orderedIds) {
     return response.data;
 }
 
+async function recordProfileVisit(username) {
+    const response = await apiClient.post(`/profile-visits/${username}`);
+    return response.data;
+}
+
+async function getProfileVisitAnalytics(username) {
+    const response = await apiClient.get(`/profile-visits/analytics/${username}`);
+    return response.data;
+}
+
+async function getProfileVisitTimeline(username, time) {
+    const params = time ? { time } : {};
+    const response = await apiClient.get(`/profile-visits/timeline/${username}`, { params });
+    return response.data;
+}
+
 export {
     createLink,
     getLinksByUsername,
@@ -81,4 +97,7 @@ export {
     getClicksPerLink,
     getClickTimeline,
     reorderLinks,
+    recordProfileVisit,
+    getProfileVisitAnalytics,
+    getProfileVisitTimeline,
 };
