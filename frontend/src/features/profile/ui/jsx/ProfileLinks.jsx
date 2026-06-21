@@ -1,7 +1,7 @@
 import ProfileLinkCard from "./ProfileLinkCard";
 import styles from "../css/ProfilePage.module.css";
 
-function ProfileLinks({ links, textColor }) {
+function ProfileLinks({ links, textColor, isPremium }) {
     const highlighted = links.filter((l) => l.isHighlighted && (!l.highlightExpiresAt || new Date(l.highlightExpiresAt) > new Date()));
     const regular = links.filter((l) => !l.isHighlighted || (l.highlightExpiresAt && new Date(l.highlightExpiresAt) <= new Date()));
     const sorted = [...highlighted, ...regular.sort((a, b) => (a.order || 0) - (b.order || 0))];
@@ -9,7 +9,7 @@ function ProfileLinks({ links, textColor }) {
     return (
         <div className={styles.links}>
             {sorted.map((link) => (
-                <ProfileLinkCard key={link._id} link={link} textColor={textColor} />
+                <ProfileLinkCard key={link._id} link={link} textColor={textColor} isPremium={isPremium} />
             ))}
         </div>
     );

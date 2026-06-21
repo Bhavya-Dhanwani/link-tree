@@ -77,7 +77,7 @@ function ProfilePage() {
                     <ProfilePicture isOwner={isOwner} profileUser={profile} />
                     <ProfileUsername username={username} textColor={textColor} />
                 </div>
-                <ProfileLinks links={links} textColor={textColor} />
+                <ProfileLinks links={links} textColor={textColor} isPremium={profile?.isPremium} />
             </div>
         </div>
     );

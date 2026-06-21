@@ -61,16 +61,42 @@ function getFaviconUrl(url) {
     }
 }
 
-function ProfileLinkCard({ link, textColor }) {
+function ProfileLinkCard({ link, textColor, isPremium }) {
     const platform = link.platformIcon || getPlatformFromUrl(link.url);
     const iconData = platform ? PLATFORM_ICONS[platform] : null;
     const favicon = getFaviconUrl(link.url);
-    const borderColor = link.borderColor || (textColor ? `${textColor}20` : "#e0e0e0");
-    const borderWidth = link.borderWidth || 1;
     const urlColor = textColor ? `${textColor}99` : "#888";
 
     const isExpired = link.highlightExpiresAt && new Date(link.highlightExpiresAt) < new Date();
-    const isHighlighted = link.isHighlighted && !isExpired;
+    const isHighlighted = isPremium && link.isHighlighted && !isExpired;
+
+    if (!isPremium) {
+        return (
+            <a
+                className={styles.linkCard}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => { if (e.isTrusted) recordClick(link._id); }}
+                style={{
+                    borderColor: textColor ? `${textColor}20` : "#e0e0e0",
+                    borderWidth: 1,
+                    borderStyle: "solid",
+                    color: textColor,
+                }}
+            >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <h3 className={styles.linkTitle} style={{ color: textColor }}>{link.title}</h3>
+                        <p className={styles.linkUrl} style={{ color: urlColor, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{link.url}</p>
+                    </div>
+                </div>
+            </a>
+        );
+    }
+
+    const borderColor = link.borderColor || (textColor ? `${textColor}20` : "#e0e0e0");
+    const borderWidth = link.borderWidth || 1;
 
     return (
         <a
