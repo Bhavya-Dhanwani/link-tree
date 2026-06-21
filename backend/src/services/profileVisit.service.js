@@ -1,6 +1,13 @@
-import { recordProfileVisit, countProfileVisitsByUsername, countProfileVisitsByUsernameSince, getProfileVisitTimelineByUsername } from "../dao/profileVisit.dao.js";
+import { findRecentProfileVisit, recordProfileVisit, countProfileVisitsByUsername, countProfileVisitsByUsernameSince, getProfileVisitTimelineByUsername } from "../dao/profileVisit.dao.js";
 
 async function recordProfileVisitService(username, ip) {
+    const dedupeSince = new Date(Date.now() - 60 * 1000);
+    const existingVisit = await findRecentProfileVisit(username, ip, dedupeSince);
+
+    if (existingVisit) {
+        return existingVisit;
+    }
+
     return recordProfileVisit(username, ip);
 }
 
@@ -56,3 +63,4 @@ export {
     getProfileVisitAnalyticsService,
     getProfileVisitTimelineService,
 };
+

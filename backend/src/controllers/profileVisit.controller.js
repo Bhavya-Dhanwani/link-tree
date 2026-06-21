@@ -4,7 +4,8 @@ import asyncWrapper from "../utils/asyncWrapper.js";
 
 const recordVisit = asyncWrapper(async (req, res) => {
     const { username } = req.params;
-    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "";
+    const forwardedFor = req.headers["x-forwarded-for"];
+    const ip = (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor?.split(",")[0]) || req.socket.remoteAddress || "";
 
     await recordProfileVisitService(username, ip);
 
@@ -29,3 +30,5 @@ export {
     getProfileVisitAnalytics,
     getProfileVisitTimeline,
 };
+
+

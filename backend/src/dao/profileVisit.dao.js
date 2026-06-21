@@ -1,5 +1,13 @@
 import ProfileVisit from "../models/profileVisit.model.js";
 
+async function findRecentProfileVisit(username, ip, since) {
+    return ProfileVisit.findOne({
+        username,
+        ip,
+        createdAt: { $gte: since }
+    });
+}
+
 async function recordProfileVisit(username, ip) {
     return ProfileVisit.create({ username, ip });
 }
@@ -41,8 +49,10 @@ async function getProfileVisitTimelineByUsername(username, since, interval) {
 }
 
 export {
+    findRecentProfileVisit,
     recordProfileVisit,
     countProfileVisitsByUsername,
     countProfileVisitsByUsernameSince,
     getProfileVisitTimelineByUsername,
 };
+

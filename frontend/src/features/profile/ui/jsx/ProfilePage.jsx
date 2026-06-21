@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useProfileLinks from "../../hooks/useProfileLinks";
 import usePublicProfile from "../../hooks/usePublicProfile";
 import ProfileHeader from "./ProfileHeader";
@@ -15,13 +15,17 @@ import styles from "../css/ProfilePage.module.css";
 function ProfilePage() {
     const { username } = useParams();
     const { user } = useAuth();
+    const recordedVisitRef = useRef(null);
     const { links, isLoading: linksLoading, error } = useProfileLinks(username);
     const { profile, isLoading: themeLoading } = usePublicProfile(username);
     const isOwner = user?.username === username;
 
     useEffect(() => {
-        if (username) {
-            recordProfileVisit(username).catch(() => {});
+        if (username && recordedVisitRef.current !== username) {
+            recordedVisitRef.current = username;
+            recordProfileVisit(username).catch(() => {
+                recordedVisitRef.current = null;
+            });
         }
     }, [username]);
 
@@ -80,3 +84,4 @@ function ProfilePage() {
 }
 
 export default ProfilePage;
+
