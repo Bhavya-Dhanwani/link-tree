@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import useAuthForm from "../../hooks/useAuthForm";
 import useUsernameCheck from "../../hooks/useUsernameCheck";
 import AuthButton from "./AuthButton";
@@ -82,6 +83,7 @@ function AuthPanel() {
                     icon="lock"
                     id={authMode + "-password"}
                     label="Password"
+                    labelRight={isLogin ? <Link href="/forgot-password" style={{ fontSize: "0.85rem", color: "#4f46e5", textDecoration: "none" }}>Forgot password?</Link> : undefined}
                     name="password"
                     placeholder={isLogin ? "Enter your password" : "Create a password"}
                     type="password"

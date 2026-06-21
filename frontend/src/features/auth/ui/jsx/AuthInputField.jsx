@@ -39,14 +39,17 @@ function EyeIcon() {
     );
 }
 
-function AuthInputField({ hint, hintColor, icon, id, label, name, placeholder, type = "text", value, onChange }) {
+function AuthInputField({ hint, hintColor, icon, id, label, labelRight, name, placeholder, type = "text", value, onChange }) {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
     const inputType = isPassword && showPassword ? "text" : type;
 
     return (
         <div className={styles.fieldGroup}>
-            <label className={styles.label} htmlFor={id}>{label}</label>
+            <div className={styles.labelRow}>
+                <label className={styles.label} htmlFor={id}>{label}</label>
+                {labelRight && <span className={styles.labelRight}>{labelRight}</span>}
+            </div>
             <div className={styles.inputWrap}>
                 <span className={styles.icon}>
                     <FieldIcon name={icon} />

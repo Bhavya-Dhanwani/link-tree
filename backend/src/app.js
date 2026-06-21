@@ -22,8 +22,8 @@ function createApp() {
         return ApiResponse(res, 200, "Server is healthy");
     });
 
-    // Setting up rate limiter on API routes (20 requests per minute, 5 min block)
-    app.use("/api", rateLimiter({ windowMs: 60 * 1000, max: 20, blockDuration: 5 * 60 * 1000 }));
+    // Setting up rate limiter on API routes (100 requests per minute, 5 min block)
+    app.use("/api", rateLimiter({ windowMs: 60 * 1000, max: 100, blockDuration: 5 * 60 * 1000 }));
 
     // Setting up API routes
     app.use("/api", indexRouter);

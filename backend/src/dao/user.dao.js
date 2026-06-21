@@ -1,5 +1,6 @@
 // Importing modules
 import User from "../models/user.model.js";
+import PasswordResetToken from "../models/passwordResetToken.model.js";
 
 // Finding user by email
 async function findUserByEmail(email) {
@@ -41,6 +42,34 @@ async function updateUserTheme(userId, bgColor, textColor) {
     return User.findByIdAndUpdate(userId, { bgColor, textColor }, { new: true });
 }
 
+// Creating a password reset token
+async function createResetToken(userId, token, expiresAt) {
+    return PasswordResetToken.create({ userId, token, expiresAt });
+}
+
+// Finding a password reset token
+async function findResetToken(token) {
+    return PasswordResetToken.findOne({ token });
+}
+
+// Deleting a password reset token
+async function deleteResetToken(token) {
+    return PasswordResetToken.deleteOne({ token });
+}
+
+// Deleting all reset tokens for a user
+async function deleteAllResetTokens(userId) {
+    return PasswordResetToken.deleteMany({ userId });
+}
+
+// Updating user password
+async function resetUserPassword(userId, password) {
+    const user = await User.findById(userId);
+    user.password = password;
+    await user.save({ validateBeforeSave: false });
+    return user;
+}
+
 // Exporting user DAO methods
 export {
     createUser,
@@ -51,4 +80,9 @@ export {
     updateUserProfilePicture,
     updateUserUsername,
     updateUserTheme,
+    createResetToken,
+    findResetToken,
+    deleteResetToken,
+    deleteAllResetTokens,
+    resetUserPassword,
 };

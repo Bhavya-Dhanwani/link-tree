@@ -1,5 +1,5 @@
 // Importing modules
-import { loginService, signupService, checkUsernameService, getImageKitAuth, updateProfilePictureService, updateUsernameService, getCurrentUserService, updateThemeService, getPublicUserThemeService } from "../services/auth.service.js";
+import { loginService, signupService, checkUsernameService, getImageKitAuth, updateProfilePictureService, updateUsernameService, getCurrentUserService, updateThemeService, getPublicUserThemeService, forgotPasswordService, resetPasswordService } from "../services/auth.service.js";
 import { sanitizeAuthUserResponse } from "../sanitizers/auth.sanitize.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
@@ -84,6 +84,20 @@ const getPublicUserTheme = asyncWrapper(async (req, res) => {
     return ApiResponse(res, 200, "User theme fetched successfully", data);
 });
 
+// Sending forgot password email
+const forgotPassword = asyncWrapper(async (req, res) => {
+    const result = await forgotPasswordService(req.body.email);
+
+    return ApiResponse(res, 200, result.message);
+});
+
+// Resetting password with token
+const resetPassword = asyncWrapper(async (req, res) => {
+    const result = await resetPasswordService(req.params.token, req.body.password);
+
+    return ApiResponse(res, 200, result.message);
+});
+
 // Exporting auth controllers
 export {
     loginUser,
@@ -96,4 +110,6 @@ export {
     updateUsername,
     updateTheme,
     getPublicUserTheme,
+    forgotPassword,
+    resetPassword,
 };

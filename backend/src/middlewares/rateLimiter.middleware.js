@@ -7,6 +7,7 @@ function rateLimiter(options = {}) {
         windowMs = 60 * 1000,   // Time window in milliseconds (default: 1 minute)
         max = 20,                // Max requests per window (default: 20)
         blockDuration = 5 * 60 * 1000, // Block duration after exceeding limit (default: 5 minutes)
+        message = "Too many requests. Blocked for 5 minutes.",
     } = options;
 
     return (req, res, next) => {
@@ -50,7 +51,7 @@ function rateLimiter(options = {}) {
 
             return res.status(429).json({
                 success: false,
-                message: "Too many requests. Blocked for 5 minutes.",
+                message,
             });
         }
 

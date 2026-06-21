@@ -50,6 +50,16 @@ async function getPublicUserTheme(username) {
     return response.data;
 }
 
+async function forgotPassword(email) {
+    const response = await apiClient.post("/auth/forgot-password", { email });
+    return response.data;
+}
+
+async function resetPassword(token, password) {
+    const response = await apiClient.post(`/auth/reset-password/${token}`, { password });
+    return response.data;
+}
+
 export {
     loginUser,
     signupUser,
@@ -61,4 +71,6 @@ export {
     updateUsername,
     updateTheme,
     getPublicUserTheme,
+    forgotPassword,
+    resetPassword,
 };

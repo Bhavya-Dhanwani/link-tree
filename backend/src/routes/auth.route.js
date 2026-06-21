@@ -1,6 +1,6 @@
 // Importing modules
 import { Router } from "express";
-import { loginUser, signupUser, getCurrentUser, logoutUser, checkUsername, getImagekitAuth, updateProfilePicture, updateUsername, updateTheme, getPublicUserTheme } from "../controllers/auth.controller.js";
+import { loginUser, signupUser, getCurrentUser, logoutUser, checkUsername, getImagekitAuth, updateProfilePicture, updateUsername, updateTheme, getPublicUserTheme, forgotPassword, resetPassword } from "../controllers/auth.controller.js";
 import validateErrors from "../middlewares/validateErrors.middleware.js";
 import protect from "../middlewares/auth.middleware.js";
 import { sanitizeLogin, sanitizeSignup } from "../sanitizers/auth.sanitize.js";
@@ -35,6 +35,12 @@ router.put("/theme", protect, updateTheme);
 
 // Getting public user theme by username (public)
 router.get("/user/:username", getPublicUserTheme);
+
+// Sending forgot password email (public)
+router.post("/forgot-password", forgotPassword);
+
+// Resetting password with token (public)
+router.post("/reset-password/:token", resetPassword);
 
 // Logging out user
 router.post("/logout", logoutUser);

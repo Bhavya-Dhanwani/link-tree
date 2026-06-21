@@ -1,8 +1,11 @@
 // Importing modules
-import { createUser, findUserByEmail, findUserByEmailWithPassword, findUserByName, findUserById, updateUserProfilePicture, updateUserUsername, updateUserTheme } from "../dao/user.dao.js";
+import { createUser, findUserByEmail, findUserByEmailWithPassword, findUserByName, findUserById, updateUserProfilePicture, updateUserUsername, updateUserTheme, createResetToken, findResetToken, deleteResetToken, deleteAllResetTokens, resetUserPassword } from "../dao/user.dao.js";
 import ApiError from "../utils/ApiError.js";
 import ImageKit from "@imagekit/nodejs";
 import { IMAGEKIT_PRIVATE_KEY } from "../config/env.config.js";
+import crypto from "crypto";
+import sendMail from "../utils/sendMail.js";
+import { passwordResetEmailTemplate, buildResetUrl } from "../utils/emailTemplate.js";
 
 // Creating signup service
 async function signupService(payload = {}) {
@@ -211,6 +214,67 @@ async function getPublicUserThemeService(username) {
     };
 }
 
+// Sending forgot password email
+async function forgotPasswordService(email) {
+    if (!email || !email.trim()) {
+        throw new ApiError(400, "Email is required");
+    }
+
+    const user = await findUserByEmail(email.trim());
+
+    if (!user) {
+        throw new ApiError(404, "No account found with this email");
+    }
+
+    await deleteAllResetTokens(user._id);
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await createResetToken(user._id, hashedToken, expiresAt);
+
+    const resetUrl = buildResetUrl(rawToken);
+
+    try {
+        await sendMail({
+            to: user.email,
+            subject: "Reset Your Password - Linkter",
+            html: passwordResetEmailTemplate(user.name, resetUrl),
+        });
+    } catch (err) {
+        console.error("Email send error:", err);
+        await deleteAllResetTokens(user._id);
+        throw new ApiError(500, "Failed to send email. Please try again later.");
+    }
+
+    return { message: "Reset link has been sent to your email" };
+}
+
+// Resetting password with token
+async function resetPasswordService(token, newPassword) {
+    if (!token || !newPassword) {
+        throw new ApiError(400, "Token and new password are required");
+    }
+
+    if (newPassword.length < 6) {
+        throw new ApiError(400, "Password must be at least 6 characters long");
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const resetToken = await findResetToken(hashedToken);
+
+    if (!resetToken) {
+        throw new ApiError(400, "Invalid or expired reset token");
+    }
+
+    await resetUserPassword(resetToken.userId, newPassword);
+    await deleteResetToken(hashedToken);
+
+    return { message: "Password reset successfully" };
+}
+
 // Exporting auth services
 export {
     loginService,
@@ -222,4 +286,6 @@ export {
     getCurrentUserService,
     updateThemeService,
     getPublicUserThemeService,
+    forgotPasswordService,
+    resetPasswordService,
 };
