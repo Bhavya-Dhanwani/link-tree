@@ -4,7 +4,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
 
 const createLink = asyncWrapper(async (req, res) => {
-    const link = await createLinkService(req.body, req.user.name);
+    const link = await createLinkService(req.body, req.user);
     return ApiResponse(res, 201, "Link created successfully", link);
 });
 
@@ -49,13 +49,13 @@ const reorderLinks = asyncWrapper(async (req, res) => {
 });
 
 const updateLinkStyle = asyncWrapper(async (req, res) => {
-    const link = await updateLinkStyleService(req.params.id, req.user.name, req.body);
+    const link = await updateLinkStyleService(req.params.id, req.user, req.body);
     return ApiResponse(res, 200, "Link style updated", link);
 });
 
 const highlightLink = asyncWrapper(async (req, res) => {
     const { expiresAt } = req.body;
-    const link = await highlightLinkService(req.params.id, req.user.name, expiresAt);
+    const link = await highlightLinkService(req.params.id, req.user, expiresAt);
     return ApiResponse(res, 200, "Link highlighted", link);
 });
 
@@ -72,3 +72,4 @@ export {
     updateLinkStyle,
     highlightLink,
 };
+

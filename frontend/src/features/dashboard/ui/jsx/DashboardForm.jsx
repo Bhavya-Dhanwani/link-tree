@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { getMySubscription } from "@/features/payments/api/payment.api";
 import useLinkForm from "../../hooks/useLinkForm";
 import styles from "../css/DashboardForm.module.css";
 
@@ -58,6 +60,10 @@ function getFaviconUrl(url) {
 }
 
 function DashboardForm() {
+    const { user } = useAuth();
+    const isAdmin = user?.role === "admin";
+    const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+    const isPremium = isAdmin || hasActiveSubscription;
     const {
         form,
         isSubmitting,
@@ -65,9 +71,19 @@ function DashboardForm() {
         handleSubmit,
     } = useLinkForm();
 
-    const platform = form.url ? getPlatformFromUrl(form.url) : null;
-    const favicon = form.url ? getFaviconUrl(form.url) : null;
-    const platformColor = platform ? PLATFORM_COLORS[platform] : "#4f46e5";
+    useEffect(() => {
+        if (isAdmin) return;
+
+        getMySubscription().then((sub) => {
+            setHasActiveSubscription(sub?.status === "active");
+        }).catch(() => {
+            setHasActiveSubscription(false);
+        });
+    }, [isAdmin]);
+
+    const platform = isPremium && form.url ? getPlatformFromUrl(form.url) : null;
+    const favicon = isPremium && form.url ? getFaviconUrl(form.url) : null;
+    const platformColor = platform ? PLATFORM_COLORS[platform] : "#e0e0e0";
 
     return (
         <div className={styles.container}>
@@ -99,7 +115,7 @@ function DashboardForm() {
                     />
                 </div>
 
-                {form.url && (
+                {isPremium && form.url && (
                     <div className={styles.field}>
                         <label className={styles.label}>Preview</label>
                         <div style={{
@@ -151,3 +167,6 @@ function DashboardForm() {
 }
 
 export default DashboardForm;
+
+
+

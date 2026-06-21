@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
-import { getMyLinks, deleteLink, reorderLinks } from "../../api/link.api";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { getMySubscription } from "@/features/payments/api/payment.api";
 import { updateLinkStyle, highlightLink } from "@/features/premium/api/premium.api";
+import { getMyLinks, deleteLink, reorderLinks } from "../../api/link.api";
 import { sortByOrder } from "@/features/shared/utils/heapSort";
 import styles from "../css/ViewLinks.module.css";
 
@@ -49,13 +51,27 @@ function getApiErrorMessage(error) {
 }
 
 function ViewLinks() {
+    const { user } = useAuth();
+    const isAdmin = user?.role === "admin";
     const [links, setLinks] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+    const isPremium = isAdmin || hasActiveSubscription;
     const [dragIndex, setDragIndex] = useState(null);
     const [editingColor, setEditingColor] = useState(null);
     const [colorValue, setColorValue] = useState("#4f46e5");
     const dragItem = useRef(null);
     const dragOverItem = useRef(null);
+
+    useEffect(() => {
+        if (isAdmin) return;
+
+        getMySubscription().then((sub) => {
+            setHasActiveSubscription(sub?.status === "active");
+        }).catch(() => {
+            setHasActiveSubscription(false);
+        });
+    }, [isAdmin]);
 
     useEffect(() => {
         async function loadLinks() {
@@ -82,6 +98,8 @@ function ViewLinks() {
     }
 
     async function handleColorSave(linkId) {
+        if (!isPremium) return;
+
         try {
             await updateLinkStyle(linkId, { borderColor: colorValue });
             setLinks((prev) => prev.map((l) => l._id === linkId ? { ...l, borderColor: colorValue } : l));
@@ -93,6 +111,8 @@ function ViewLinks() {
     }
 
     async function handleToggleHighlight(linkId, currentStatus) {
+        if (!isPremium) return;
+
         try {
             if (currentStatus) {
                 await updateLinkStyle(linkId, { isHighlighted: false, highlightExpiresAt: null });
@@ -156,10 +176,10 @@ function ViewLinks() {
     return (
         <div className={styles.container}>
             {links.map((link, index) => {
-                const platform = getPlatformFromUrl(link.url);
-                const favicon = getFaviconUrl(link.url);
+                const platform = isPremium ? getPlatformFromUrl(link.url) : null;
+                const favicon = isPremium ? getFaviconUrl(link.url) : null;
                 const platformColor = platform ? PLATFORM_ICONS[platform] : null;
-                const borderCol = link.borderColor || "#e0e0e0";
+                const borderCol = isPremium ? (link.borderColor || "#e0e0e0") : "#e0e0e0";
 
                 return (
                     <div
@@ -196,54 +216,58 @@ function ViewLinks() {
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                            <button
-                                onClick={() => handleToggleHighlight(link._id, link.isHighlighted)}
-                                style={{
-                                    padding: "4px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600,
-                                    cursor: "pointer", border: "none",
-                                    background: link.isHighlighted ? "#f59e0b" : "#f1f5f9",
-                                    color: link.isHighlighted ? "#fff" : "#64718a",
-                                }}
-                                title={link.isHighlighted ? "Remove highlight" : "Highlight this link"}
-                            >
-                                {link.isHighlighted ? "★ Featured" : "☆ Feature"}
-                            </button>
-                            {editingColor === link._id ? (
-                                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                    <input
-                                        type="color"
-                                        value={colorValue}
-                                        onChange={(e) => setColorValue(e.target.value)}
-                                        style={{ width: 28, height: 28, border: "none", padding: 0, cursor: "pointer", borderRadius: 4 }}
-                                    />
+                            {isPremium && (
+                                <>
                                     <button
-                                        onClick={() => handleColorSave(link._id)}
+                                        onClick={() => handleToggleHighlight(link._id, link.isHighlighted)}
                                         style={{
-                                            padding: "4px 8px", border: "none", borderRadius: 4,
-                                            background: "#22c55e", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                                            padding: "4px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600,
+                                            cursor: "pointer", border: "none",
+                                            background: link.isHighlighted ? "#f59e0b" : "#f1f5f9",
+                                            color: link.isHighlighted ? "#fff" : "#64718a",
                                         }}
+                                        title={link.isHighlighted ? "Remove highlight" : "Highlight this link"}
                                     >
-                                        Save
+                                        {link.isHighlighted ? "Featured" : "Feature"}
                                     </button>
-                                    <button
-                                        onClick={() => setEditingColor(null)}
-                                        style={{
-                                            padding: "4px 8px", border: "1px solid #e2e8f0", borderRadius: 4,
-                                            background: "#fff", fontSize: 11, cursor: "pointer",
-                                        }}
-                                    >
-                                        X
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={() => { setEditingColor(link._id); setColorValue(link.borderColor || "#4f46e5"); }}
-                                    style={{
-                                        width: 24, height: 24, borderRadius: 6, border: `2px solid ${borderCol}`,
-                                        background: borderCol, cursor: "pointer", padding: 0,
-                                    }}
-                                    title="Change border color"
-                                />
+                                    {editingColor === link._id ? (
+                                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                            <input
+                                                type="color"
+                                                value={colorValue}
+                                                onChange={(e) => setColorValue(e.target.value)}
+                                                style={{ width: 28, height: 28, border: "none", padding: 0, cursor: "pointer", borderRadius: 4 }}
+                                            />
+                                            <button
+                                                onClick={() => handleColorSave(link._id)}
+                                                style={{
+                                                    padding: "4px 8px", border: "none", borderRadius: 4,
+                                                    background: "#22c55e", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                                                }}
+                                            >
+                                                Save
+                                            </button>
+                                            <button
+                                                onClick={() => setEditingColor(null)}
+                                                style={{
+                                                    padding: "4px 8px", border: "1px solid #e2e8f0", borderRadius: 4,
+                                                    background: "#fff", fontSize: 11, cursor: "pointer",
+                                                }}
+                                            >
+                                                X
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => { setEditingColor(link._id); setColorValue(link.borderColor || "#4f46e5"); }}
+                                            style={{
+                                                width: 24, height: 24, borderRadius: 6, border: `2px solid ${borderCol}`,
+                                                background: borderCol, cursor: "pointer", padding: 0,
+                                            }}
+                                            title="Change border color"
+                                        />
+                                    )}
+                                </>
                             )}
                             <button
                                 className={styles.deleteBtn}
@@ -260,3 +284,5 @@ function ViewLinks() {
 }
 
 export default ViewLinks;
+
+

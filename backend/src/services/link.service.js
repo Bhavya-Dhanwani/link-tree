@@ -1,11 +1,13 @@
 // Importing modules
 import { createLink, findLinksByUsername, findAllLinksByUsername, findDeletedLinksByUsername, findLinkById, softDeleteLinkById, hardDeleteLinkById, restoreLinkById, reorderLinks, getMaxOrder, updateLinkById } from "../dao/link.dao.js";
 import ApiError from "../utils/ApiError.js";
-import { getPlatformFromUrl } from "../utils/platformIcons.js";
+import isPremiumUser from "../utils/isPremiumUser.js";
 
 // Creating a new link
-async function createLinkService(payload = {}, username) {
+async function createLinkService(payload = {}, user) {
     const { title, url, borderColor } = payload;
+    const username = user.name;
+    const hasPremium = await isPremiumUser(user.id);
 
     const maxOrder = await getMaxOrder(username);
 
@@ -14,7 +16,7 @@ async function createLinkService(payload = {}, username) {
         url,
         username,
         order: maxOrder + 1,
-        borderColor: borderColor || "#4f46e5",
+        borderColor: hasPremium ? (borderColor || "#4f46e5") : "#e0e0e0",
     });
 
     return link;
@@ -110,10 +112,11 @@ async function reorderLinkService(username, orderedIds) {
     return await findLinksByUsername(username);
 }
 
-async function updateLinkStyleService(linkId, username, payload) {
+async function updateLinkStyleService(linkId, user, payload) {
     const link = await findLinkById(linkId);
     if (!link) throw new ApiError(404, "Link not found");
-    if (link.username !== username) throw new ApiError(403, "Not authorized");
+    if (link.username !== user.name) throw new ApiError(403, "Not authorized");
+    if (!(await isPremiumUser(user.id))) throw new ApiError(403, "Premium required for link styling");
 
     const { platformIcon, customIcon, borderColor, borderWidth, isHighlighted, highlightExpiresAt } = payload;
     const updateData = {};
@@ -128,10 +131,11 @@ async function updateLinkStyleService(linkId, username, payload) {
     return updateLinkById(linkId, updateData);
 }
 
-async function highlightLinkService(linkId, username, expiresAt) {
+async function highlightLinkService(linkId, user, expiresAt) {
     const link = await findLinkById(linkId);
     if (!link) throw new ApiError(404, "Link not found");
-    if (link.username !== username) throw new ApiError(403, "Not authorized");
+    if (link.username !== user.name) throw new ApiError(403, "Not authorized");
+    if (!(await isPremiumUser(user.id))) throw new ApiError(403, "Premium required to feature links");
 
     return updateLinkById(linkId, {
         isHighlighted: true,
@@ -151,3 +155,5 @@ export {
     updateLinkStyleService,
     highlightLinkService,
 };
+
+
