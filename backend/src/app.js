@@ -1,5 +1,7 @@
 // Importing modules
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import setMiddlewares from "./middlewares/index.middleware.js";
 import errorHandler from "./middlewares/error.middleware.js";
 import rateLimiter from "./middlewares/rateLimiter.middleware.js";
@@ -7,6 +9,9 @@ import ApiError from "./utils/ApiError.js";
 import ApiResponse from "./utils/ApiResponse.js";
 import indexRouter from "./routes/index.route.js";
 import morgan from "morgan";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function createApp() {
     const app = express();
@@ -27,6 +32,9 @@ function createApp() {
 
     // Setting up API routes
     app.use("/api", indexRouter);
+
+    // Serving static files from public folder
+    app.use(express.static(path.join(__dirname, "../../public")));
 
     // Send unknown routes to the centralized error handler.
     app.use((req, res, next) => {

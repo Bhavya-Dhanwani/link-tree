@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { updateUsername, updateTheme, getImagekitAuth } from "@/features/auth/api/auth.api";
 import { updateBrand } from "@/features/premium/api/premium.api";
+import { getMySubscription } from "@/features/payments/api/payment.api";
 import ProfilePictureUpload from "@/features/auth/ui/jsx/ProfilePictureUpload";
 import useUsernameCheck from "@/features/auth/hooks/useUsernameCheck";
 import styles from "../css/ProfileTab.module.css";
@@ -34,8 +35,13 @@ function ProfileTab() {
     const [isSavingBrand, setIsSavingBrand] = useState(false);
     const [isUploadingLogo, setIsUploadingLogo] = useState(false);
     const logoInputRef = useRef(null);
+    const [isPremium, setIsPremium] = useState(user?.role === "admin");
 
-    const isPremium = user?.role === "admin";
+    useEffect(() => {
+        getMySubscription().then((sub) => {
+            if (sub && sub.status === "active") setIsPremium(true);
+        }).catch(() => {});
+    }, []);
 
     const profileUrl = typeof window !== "undefined"
         ? `${window.location.origin}/${user?.username}`

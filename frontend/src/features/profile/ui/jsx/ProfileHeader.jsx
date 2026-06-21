@@ -21,6 +21,7 @@ function ProfileHeader({ bgColor, textColor, customLogo, customName, removeLinkt
     const logoTextColor = textColor || "#333";
 
     if (removeLinkterBranding) {
+        if (!customLogo && !customName) return null;
         return (
             <div className={styles.header} style={{ justifyContent: "center", gap: 12 }}>
                 {customLogo && (
@@ -35,9 +36,6 @@ function ProfileHeader({ bgColor, textColor, customLogo, customName, removeLinkt
                 )}
                 {customName && (
                     <h2 className={styles.logoText} style={{ color: logoTextColor }}>{customName}</h2>
-                )}
-                {!customName && !customLogo && (
-                    <h2 className={styles.logoText} style={{ color: logoTextColor }}>My Links</h2>
                 )}
             </div>
         );

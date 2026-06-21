@@ -78,7 +78,7 @@ function ProfileLinkCard({ link, textColor }) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => recordClick(link._id)}
+            onClick={(e) => { if (e.isTrusted) recordClick(link._id); }}
             style={{
                 borderColor,
                 borderWidth: `${Math.max(borderWidth, isHighlighted ? 3 : 1)}px`,
