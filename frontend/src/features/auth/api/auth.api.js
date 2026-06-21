@@ -20,9 +20,15 @@ async function logoutUser() {
     return response.data;
 }
 
+async function checkUsername(username) {
+    const response = await apiClient.get(`/auth/check-username/${username}`);
+    return response.data;
+}
+
 export {
     loginUser,
     signupUser,
     getCurrentUser,
     logoutUser,
+    checkUsername,
 };

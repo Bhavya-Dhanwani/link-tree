@@ -1,14 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Pie } from "react-chartjs-2";
+import {
+    Chart as ChartJS,
+    ArcElement,
+    LineElement,
+    PointElement,
+    LinearScale,
+    CategoryScale,
+    Tooltip,
+    Legend,
+    Filler,
+} from "chart.js";
+import { Pie, Line } from "react-chartjs-2";
 import { toast } from "react-toastify";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import { getClicksPerLink } from "../../api/link.api";
+import { getClicksPerLink, getClickTimeline } from "../../api/link.api";
 import styles from "../css/Analysis.module.css";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler);
 
 const TIME_OPTIONS = [
     { label: "All Time", value: "" },
@@ -23,64 +33,122 @@ const COLORS = [
     "#8b5cf6", "#ec4899", "#14b8a6", "#f97316", "#6366f1",
 ];
 
+function formatTimeLabel(raw, timeFilter) {
+    const date = new Date(raw);
+    if (timeFilter === "last1h") {
+        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    if (timeFilter === "last24h") {
+        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    return date.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
 function getApiErrorMessage(error) {
     return error?.response?.data?.message || error.message || "Something went wrong";
 }
 
 function Analysis() {
     const { user } = useAuth();
-    const [data, setData] = useState([]);
+    const [pieData, setPieData] = useState([]);
+    const [timelineData, setTimelineData] = useState({ times: [], links: [] });
     const [selected, setSelected] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchPerLink() {
+        async function fetchData() {
             try {
-                const response = await getClicksPerLink(user.username, selected);
-                setData(response.data);
+                const [perLinkRes, timelineRes] = await Promise.all([
+                    getClicksPerLink(user.username, selected),
+                    getClickTimeline(user.username, selected),
+                ]);
+                setPieData(perLinkRes.data);
+                setTimelineData(timelineRes.data);
             } catch (error) {
                 toast.error(getApiErrorMessage(error));
             } finally {
                 setIsLoading(false);
             }
         }
-        fetchPerLink();
+        fetchData();
     }, [user.username, selected]);
 
     if (isLoading) {
         return <p className={styles.loading}>Loading analytics...</p>;
     }
 
-    const hasData = data.length > 0;
+    const hasPieData = pieData.length > 0;
+    const hasTimelineData = timelineData.links.length > 0;
 
-    const chartData = {
-        labels: hasData ? data.map((d) => d.title) : ["No Clicks"],
+    const pieChartData = {
+        labels: hasPieData ? pieData.map((d) => d.title) : ["No Clicks"],
         datasets: [
             {
-                data: hasData ? data.map((d) => d.count) : [1],
-                backgroundColor: hasData
-                    ? data.map((_, i) => COLORS[i % COLORS.length])
+                data: hasPieData ? pieData.map((d) => d.count) : [1],
+                backgroundColor: hasPieData
+                    ? pieData.map((_, i) => COLORS[i % COLORS.length])
                     : ["#d0d0d0"],
                 borderWidth: 0,
             },
         ],
     };
 
-    const chartOptions = {
+    const pieChartOptions = {
         responsive: true,
         maintainAspectRatio: true,
         plugins: {
             legend: {
-                display: hasData,
+                display: hasPieData,
                 position: "bottom",
             },
             tooltip: {
-                enabled: hasData,
+                enabled: hasPieData,
             },
         },
     };
 
-    const totalClicks = data.reduce((sum, d) => sum + d.count, 0);
+    const labels = timelineData.times.map((t) => formatTimeLabel(t, selected));
+
+    const lineChartData = {
+        labels,
+        datasets: timelineData.links.map((link, i) => ({
+            label: link.title,
+            data: link.data,
+            borderColor: COLORS[i % COLORS.length],
+            backgroundColor: COLORS[i % COLORS.length] + "20",
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+        })),
+    };
+
+    const lineChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: "index",
+            intersect: false,
+        },
+        plugins: {
+            legend: {
+                position: "bottom",
+                labels: { boxWidth: 12, padding: 15 },
+            },
+        },
+        scales: {
+            x: {
+                ticks: { maxRotation: 45, font: { size: 11 } },
+                grid: { display: false },
+            },
+            y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, font: { size: 11 } },
+            },
+        },
+    };
+
+    const totalClicks = pieData.reduce((sum, d) => sum + d.count, 0);
 
     return (
         <div className={styles.container}>
@@ -102,11 +170,23 @@ function Analysis() {
                 </select>
             </div>
 
-            <div className={styles.chart}>
-                <Pie data={chartData} options={chartOptions} />
+            <div className={styles.pieSection}>
+                <h3 className={styles.sectionTitle}>Breakdown by Link</h3>
+                <div className={styles.chart}>
+                    <Pie data={pieChartData} options={pieChartOptions} />
+                </div>
             </div>
 
-            {hasData && (
+            {hasTimelineData && (
+                <div className={styles.lineChartWrap}>
+                    <h3 className={styles.sectionTitle}>Clicks Over Time</h3>
+                    <div className={styles.lineChart}>
+                        <Line data={lineChartData} options={lineChartOptions} />
+                    </div>
+                </div>
+            )}
+
+            {hasPieData && (
                 <div className={styles.stats}>
                     <div className={styles.stat}>
                         <span className={styles.statLabel}>Total Clicks</span>
@@ -114,7 +194,7 @@ function Analysis() {
                     </div>
                     <div className={styles.stat}>
                         <span className={styles.statLabel}>Links</span>
-                        <span className={styles.statValue}>{data.length}</span>
+                        <span className={styles.statValue}>{pieData.length}</span>
                     </div>
                 </div>
             )}

@@ -1,5 +1,5 @@
 // Importing modules
-import { loginService, signupService } from "../services/auth.service.js";
+import { loginService, signupService, checkUsernameService } from "../services/auth.service.js";
 import { sanitizeAuthUserResponse } from "../sanitizers/auth.sanitize.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
@@ -37,10 +37,18 @@ const logoutUser = asyncWrapper(async (req, res) => {
     return ApiResponse(res, 200, "User logged out successfully");
 });
 
+// Checking username availability
+const checkUsername = asyncWrapper(async (req, res) => {
+    const result = await checkUsernameService(req.params.username);
+
+    return ApiResponse(res, 200, "Username checked successfully", result);
+});
+
 // Exporting auth controllers
 export {
     loginUser,
     signupUser,
     getCurrentUser,
     logoutUser,
+    checkUsername,
 };

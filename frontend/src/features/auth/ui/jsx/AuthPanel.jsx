@@ -1,12 +1,29 @@
 "use client";
 
 import useAuthForm from "../../hooks/useAuthForm";
+import useUsernameCheck from "../../hooks/useUsernameCheck";
 import AuthButton from "./AuthButton";
 import AuthInputField from "./AuthInputField";
 import AuthLogo from "./AuthLogo";
 import AuthSwitch from "./AuthSwitch";
 import AuthWrapper from "./AuthWrapper";
 import styles from "../css/AuthPage.module.css";
+
+function getUsernameHint(status, formatError) {
+    if (formatError) {
+        return { text: formatError, color: "#ff4757" };
+    }
+    switch (status) {
+        case "checking":
+            return { text: "Checking availability...", color: "#888" };
+        case "available":
+            return { text: "This username is available", color: "#10b981" };
+        case "taken":
+            return { text: "This username is not available", color: "#ff4757" };
+        default:
+            return { text: "", color: "" };
+    }
+}
 
 function AuthPanel() {
     const {
@@ -18,6 +35,9 @@ function AuthPanel() {
         handleSubmit,
         switchAuthMode,
     } = useAuthForm();
+
+    const { status: usernameStatus, formatError } = useUsernameCheck(formValues.name);
+    const usernameHint = isLogin ? null : getUsernameHint(usernameStatus, formatError);
 
     return (
         <AuthWrapper>
@@ -41,6 +61,8 @@ function AuthPanel() {
                         type="text"
                         value={formValues.name}
                         onChange={handleInputChange}
+                        hint={usernameHint.text}
+                        hintColor={usernameHint.color}
                     />
                 )}
 
@@ -67,7 +89,7 @@ function AuthPanel() {
                     onChange={handleInputChange}
                 />
 
-                <AuthButton disabled={isSubmitting} type="submit">
+                <AuthButton disabled={isSubmitting || (!isLogin && (usernameStatus === "taken" || usernameStatus === "invalid"))} type="submit">
                     {isSubmitting ? "Please wait" : isLogin ? "Log in" : "Sign up"}
                 </AuthButton>
             </form>

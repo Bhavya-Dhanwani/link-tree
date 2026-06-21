@@ -56,6 +56,12 @@ async function getClicksPerLink(username, time) {
     return response.data;
 }
 
+async function getClickTimeline(username, time) {
+    const params = time ? { time } : {};
+    const response = await apiClient.get(`/clicks/timeline/${username}`, { params });
+    return response.data;
+}
+
 export {
     createLink,
     getLinksByUsername,
@@ -68,4 +74,5 @@ export {
     recordClick,
     getClickAnalytics,
     getClicksPerLink,
+    getClickTimeline,
 };

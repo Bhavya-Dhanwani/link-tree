@@ -1,5 +1,5 @@
 // Importing modules
-import { recordClickService, getClickAnalyticsByUserService, getClicksPerLinkService } from "../services/clickCount.service.js";
+import { recordClickService, getClickAnalyticsByUserService, getClicksPerLinkService, getClickTimelinePerLinkService } from "../services/clickCount.service.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
 
@@ -25,9 +25,18 @@ const getClicksPerLink = asyncWrapper(async (req, res) => {
     return ApiResponse(res, 200, "Per-link analytics fetched successfully", data);
 });
 
+// Getting click timeline per link for a user
+const getClickTimelinePerLink = asyncWrapper(async (req, res) => {
+    const { time } = req.query;
+    const data = await getClickTimelinePerLinkService(req.params.username, time);
+
+    return ApiResponse(res, 200, "Timeline analytics fetched successfully", data);
+});
+
 // Exporting click count controllers
 export {
     recordClick,
     getClickAnalyticsByUser,
     getClicksPerLink,
+    getClickTimelinePerLink,
 };

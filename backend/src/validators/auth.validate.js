@@ -1,6 +1,12 @@
 // Importing modules
 import { body } from "express-validator";
-import ApiError from "../utils/ApiError.js";
+
+// Reserved usernames that cannot be used
+const RESERVED_USERNAMES = [
+    "admin", "api", "login", "signup", "auth", "dashboard",
+    "settings", "profile", "user", "users", "link", "links",
+    "clicks", "analytics", "health", "test", "root", "system",
+];
 
 // Validating signup request body
 const signupValidator = [
@@ -8,7 +14,17 @@ const signupValidator = [
     body("name")
         .trim()
         .notEmpty()
-        .withMessage("Name cannot be empty"),
+        .withMessage("Name cannot be empty")
+        .isLength({ min: 3, max: 20 })
+        .withMessage("Username must be 3-20 characters long")
+        .isAlphanumeric()
+        .withMessage("Username must be alphanumeric only")
+        .custom((value) => {
+            if (RESERVED_USERNAMES.includes(value.toLowerCase())) {
+                throw new Error("This username is reserved");
+            }
+            return true;
+        }),
 
     body("email")
         .trim()

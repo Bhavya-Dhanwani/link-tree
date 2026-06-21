@@ -39,7 +39,7 @@ function EyeIcon() {
     );
 }
 
-function AuthInputField({ hint, icon, id, label, name, placeholder, type = "text", value, onChange }) {
+function AuthInputField({ hint, hintColor, icon, id, label, name, placeholder, type = "text", value, onChange }) {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
     const inputType = isPassword && showPassword ? "text" : type;
@@ -74,7 +74,7 @@ function AuthInputField({ hint, icon, id, label, name, placeholder, type = "text
                     </button>
                 )}
             </div>
-            {hint && <p className={styles.hint}>{hint}</p>}
+            {hint && <p className={styles.hint} style={hintColor ? { color: hintColor } : undefined}>{hint}</p>}
         </div>
     );
 }

@@ -1,5 +1,5 @@
 // Importing modules
-import { recordClick, getClickAnalyticsByUsername, getClicksPerLinkByUsername, getClicksPerLinkByUsernameSince } from "../dao/clickCount.dao.js";
+import { recordClick, getClickAnalyticsByUsername, getClicksPerLinkByUsername, getClicksPerLinkByUsernameSince, getClickTimelinePerLinkByUsername } from "../dao/clickCount.dao.js";
 import { findLinkById, findLinksByUsername } from "../dao/link.dao.js";
 import ApiError from "../utils/ApiError.js";
 
@@ -58,9 +58,61 @@ async function getClicksPerLinkService(username, timeFilter) {
     return result;
 }
 
+// Getting click timeline per link for a user
+async function getClickTimelinePerLinkService(username, timeFilter) {
+    const now = new Date();
+    let since;
+    let interval = "day";
+
+    if (timeFilter === "last1h") {
+        since = new Date(now - 60 * 60 * 1000);
+        interval = "minute";
+    } else if (timeFilter === "last24h") {
+        since = new Date(now - 24 * 60 * 60 * 1000);
+        interval = "hour";
+    } else if (timeFilter === "last7d") {
+        since = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    } else if (timeFilter === "last30d") {
+        since = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    }
+
+    const raw = await getClickTimelinePerLinkByUsername(username, since, interval);
+
+    const links = await findLinksByUsername(username);
+    const linkMap = {};
+    links.forEach((link) => {
+        linkMap[link._id.toString()] = link.title;
+    });
+
+    const timeSet = new Set();
+    const linkData = {};
+
+    raw.forEach((item) => {
+        const linkId = item._id.linkId.toString();
+        const time = item._id.time;
+
+        if (!linkMap[linkId]) return;
+
+        timeSet.add(time);
+        if (!linkData[linkId]) {
+            linkData[linkId] = { title: linkMap[linkId], points: {} };
+        }
+        linkData[linkId].points[time] = item.count;
+    });
+
+    const sortedTimes = Array.from(timeSet).sort();
+    const linksResult = Object.values(linkData).map((entry) => ({
+        title: entry.title,
+        data: sortedTimes.map((t) => entry.points[t] || 0),
+    }));
+
+    return { times: sortedTimes, links: linksResult };
+}
+
 // Exporting click count services
 export {
     recordClickService,
     getClickAnalyticsByUserService,
     getClicksPerLinkService,
+    getClickTimelinePerLinkService,
 };

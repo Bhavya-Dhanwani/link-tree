@@ -80,6 +80,32 @@ async function getClicksPerLinkByUsernameSince(username, since) {
     return result;
 }
 
+// Getting click timeline per link grouped by interval
+async function getClickTimelinePerLinkByUsername(username, since, interval) {
+    let dateFormat;
+
+    if (interval === "minute") {
+        dateFormat = { $dateToString: { format: "%Y-%m-%d %H:%M", date: "$createdAt" } };
+    } else if (interval === "hour") {
+        dateFormat = { $dateToString: { format: "%Y-%m-%d %H:00", date: "$createdAt" } };
+    } else {
+        dateFormat = { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } };
+    }
+
+    const matchStage = { username };
+    if (since) {
+        matchStage.createdAt = { $gte: since };
+    }
+
+    const result = await ClickCount.aggregate([
+        { $match: matchStage },
+        { $group: { _id: { linkId: "$linkId", time: dateFormat }, count: { $sum: 1 } } },
+        { $sort: { "_id.time": 1 } },
+    ]);
+
+    return result;
+}
+
 // Exporting click count DAO methods
 export {
     recordClick,
@@ -91,4 +117,5 @@ export {
     getClickAnalyticsByUsername,
     getClicksPerLinkByUsername,
     getClicksPerLinkByUsernameSince,
+    getClickTimelinePerLinkByUsername,
 };

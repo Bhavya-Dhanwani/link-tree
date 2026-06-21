@@ -21,10 +21,16 @@ async function findUserById(id) {
     return User.findById(id);
 }
 
+// Finding user by name
+async function findUserByName(name) {
+    return User.findOne({ name: name.trim() });
+}
+
 // Exporting user DAO methods
 export {
     createUser,
     findUserByEmail,
     findUserByEmailWithPassword,
     findUserById,
+    findUserByName,
 };

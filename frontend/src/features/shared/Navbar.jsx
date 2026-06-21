@@ -4,9 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import logo from '@/assets/logo.png';
 import { useAuth } from '../auth/context/AuthContext';
+import useLogout from '../auth/hooks/useLogout';
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
+    const { handleLogout, isLoggingOut } = useLogout();
 
     return (
         <nav className={styles.nav}>
@@ -22,7 +24,7 @@ const Navbar = () => {
                 user ? (
                 <div className={styles.other}>
                     <Link className={styles.username} href={`/${user.username}`}>{user.username}</Link>
-                    <button className={styles.logoutBtn} onClick={logout}>Logout</button>
+                    <button className={styles.logoutBtn} onClick={handleLogout} disabled={isLoggingOut}>Logout</button>
                 </div>
                 ) : ( "" )
             }
