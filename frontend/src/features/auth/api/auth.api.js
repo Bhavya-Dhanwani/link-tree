@@ -25,10 +25,28 @@ async function checkUsername(username) {
     return response.data;
 }
 
+async function getImagekitAuth() {
+    const response = await apiClient.get("/auth/imagekit-auth");
+    return response.data;
+}
+
+async function updateProfilePicture(profilePicture) {
+    const response = await apiClient.put("/auth/profile-picture", { profilePicture });
+    return response.data;
+}
+
+async function updateUsername(username) {
+    const response = await apiClient.put("/auth/username", { username });
+    return response.data;
+}
+
 export {
     loginUser,
     signupUser,
     getCurrentUser,
     logoutUser,
     checkUsername,
+    getImagekitAuth,
+    updateProfilePicture,
+    updateUsername,
 };

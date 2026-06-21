@@ -27,7 +27,8 @@ function sanitizeLogin(req, _res, next) {
 function sanitizeAuthUserResponse(user) {
     return {
         username: user.name,
-        email: user.email
+        email: user.email,
+        profilePicture: user.profilePicture || ""
     };
 }
 

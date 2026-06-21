@@ -23,7 +23,14 @@ const Navbar = () => {
             {
                 user ? (
                 <div className={styles.other}>
-                    <Link className={styles.username} href={`/${user.username}`}>{user.username}</Link>
+                    <Link className={styles.usernameLink} href={`/${user.username}`}>
+                        {user.profilePicture ? (
+                            <Image src={user.profilePicture} alt={user.username} width={36} height={36} unoptimized className={styles.pfp} />
+                        ) : (
+                            <span className={styles.pfpInitial}>{user.username[0].toUpperCase()}</span>
+                        )}
+                        <span className={styles.username}>{user.username}</span>
+                    </Link>
                     <button className={styles.logoutBtn} onClick={handleLogout} disabled={isLoggingOut}>Logout</button>
                 </div>
                 ) : ( "" )

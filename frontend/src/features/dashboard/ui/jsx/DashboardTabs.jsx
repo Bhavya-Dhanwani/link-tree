@@ -2,7 +2,7 @@
 
 import styles from "../css/DashboardTabs.module.css";
 
-const TABS = ["Add Link", "View Links", "Deleted Links", "Analysis"];
+const TABS = ["Add Link", "View Links", "Deleted Links", "Analysis", "Profile"];
 
 function DashboardTabs({ activeTab, onTabChange }) {
     return (

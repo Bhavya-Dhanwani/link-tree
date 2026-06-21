@@ -26,6 +26,16 @@ async function findUserByName(name) {
     return User.findOne({ name: name.trim() });
 }
 
+// Updating user profile picture
+async function updateUserProfilePicture(userId, profilePicture) {
+    return User.findByIdAndUpdate(userId, { profilePicture }, { new: true });
+}
+
+// Updating user username
+async function updateUserUsername(userId, name) {
+    return User.findByIdAndUpdate(userId, { name }, { new: true });
+}
+
 // Exporting user DAO methods
 export {
     createUser,
@@ -33,4 +43,6 @@ export {
     findUserByEmailWithPassword,
     findUserById,
     findUserByName,
+    updateUserProfilePicture,
+    updateUserUsername,
 };

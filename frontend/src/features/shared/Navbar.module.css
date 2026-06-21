@@ -27,6 +27,35 @@
 .other {
     display: flex;
     gap: 1rem;
+    align-items: center;
+}
+
+.usernameLink {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.pfp {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e0e0e0;
+}
+
+.pfpInitial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 0.875rem;
+    font-weight: 700;
 }
 
 .username {
@@ -34,7 +63,6 @@
     font-weight: 600;
     color: #333;
     cursor: pointer;
-    text-decoration: none;
 }
 
 .username:hover {
@@ -65,6 +93,13 @@
 
     .logoText {
         font-size: 1.1rem;
+    }
+
+    .pfp,
+    .pfpInitial {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
     }
 
     .username {

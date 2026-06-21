@@ -1,5 +1,5 @@
 // Importing modules
-import { loginService, signupService, checkUsernameService } from "../services/auth.service.js";
+import { loginService, signupService, checkUsernameService, getImageKitAuth, updateProfilePictureService, updateUsernameService, getCurrentUserService } from "../services/auth.service.js";
 import { sanitizeAuthUserResponse } from "../sanitizers/auth.sanitize.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
@@ -28,7 +28,9 @@ const loginUser = asyncWrapper(async (req, res) => {
 
 // Getting current user
 const getCurrentUser = asyncWrapper(async (req, res) => {
-    return ApiResponse(res, 200, "User fetched successfully", sanitizeAuthUserResponse(req.user));
+    const user = await getCurrentUserService(req.user.id);
+
+    return ApiResponse(res, 200, "User fetched successfully", sanitizeAuthUserResponse(user));
 });
 
 // Handling user logout
@@ -44,6 +46,29 @@ const checkUsername = asyncWrapper(async (req, res) => {
     return ApiResponse(res, 200, "Username checked successfully", result);
 });
 
+// Getting ImageKit authentication parameters
+const getImagekitAuth = asyncWrapper(async (req, res) => {
+    const result = getImageKitAuth();
+
+    return ApiResponse(res, 200, "ImageKit auth fetched successfully", result);
+});
+
+// Updating profile picture
+const updateProfilePicture = asyncWrapper(async (req, res) => {
+    const user = await updateProfilePictureService(req.user.id, req.body.profilePicture);
+
+    return ApiResponse(res, 200, "Profile picture updated successfully", sanitizeAuthUserResponse(user));
+});
+
+// Updating username
+const updateUsername = asyncWrapper(async (req, res) => {
+    const { user, token } = await updateUsernameService(req.user.id, req.body.username);
+
+    setAuthCookie(res, token);
+
+    return ApiResponse(res, 200, "Username updated successfully", sanitizeAuthUserResponse(user));
+});
+
 // Exporting auth controllers
 export {
     loginUser,
@@ -51,4 +76,7 @@ export {
     getCurrentUser,
     logoutUser,
     checkUsername,
+    getImagekitAuth,
+    updateProfilePicture,
+    updateUsername,
 };
