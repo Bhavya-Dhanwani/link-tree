@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "../../../features/auth/context/AuthContext";
 import { submitPayment, getMyPayments } from "../../../features/payments/api/payment.api";
@@ -10,7 +10,7 @@ import Image from "next/image";
 const UPI_ID = "bhavyadhanwani1234@okicici";
 const AMOUNTS = { monthly: 20, yearly: 200 };
 
-export default function UpgradePage() {
+function UpgradeContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
@@ -160,5 +160,13 @@ export default function UpgradePage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function UpgradePage() {
+    return (
+        <Suspense fallback={<div style={{ textAlign: "center", marginTop: 40 }}>Loading...</div>}>
+            <UpgradeContent />
+        </Suspense>
     );
 }
