@@ -26,7 +26,9 @@ async function getClicksPerLinkService(username, timeFilter) {
     const now = new Date();
     let since;
 
-    if (timeFilter === "last24h") {
+    if (timeFilter === "last1h") {
+        since = new Date(now - 60 * 60 * 1000);
+    } else if (timeFilter === "last24h") {
         since = new Date(now - 24 * 60 * 60 * 1000);
     } else if (timeFilter === "last7d") {
         since = new Date(now - 7 * 24 * 60 * 60 * 1000);

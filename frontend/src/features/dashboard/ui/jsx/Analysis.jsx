@@ -13,8 +13,9 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const TIME_OPTIONS = [
     { label: "All Time", value: "" },
     { label: "Last 30 Days", value: "last30d" },
-    { label: "This Week", value: "last7d" },
+    { label: "Last Week", value: "last7d" },
     { label: "Last 24 Hours", value: "last24h" },
+    { label: "Last Hour", value: "last1h" },
 ];
 
 const COLORS = [
@@ -72,6 +73,9 @@ function Analysis() {
             legend: {
                 display: hasData,
                 position: "bottom",
+            },
+            tooltip: {
+                enabled: hasData,
             },
         },
     };
