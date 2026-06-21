@@ -3,19 +3,30 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import { updateUsername } from "@/features/auth/api/auth.api";
+import { updateUsername, updateTheme } from "@/features/auth/api/auth.api";
 import ProfilePictureUpload from "@/features/auth/ui/jsx/ProfilePictureUpload";
 import useUsernameCheck from "@/features/auth/hooks/useUsernameCheck";
 import styles from "../css/ProfileTab.module.css";
+
+const PRESET_COLORS = [
+    "#ffffff", "#f8f9fa", "#e9ecef", "#dee2e6",
+    "#000000", "#212529", "#343a40", "#495057",
+    "#4f46e5", "#06b6d4", "#10b981", "#f59e0b",
+    "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6",
+];
 
 function ProfileTab() {
     const { user, loginUser } = useAuth();
     const [newUsername, setNewUsername] = useState("");
     const [isSaving, setIsSaving] = useState(false);
+    const [bgColor, setBgColor] = useState(user?.bgColor || "#ffffff");
+    const [textColor, setTextColor] = useState(user?.textColor || "#333333");
+    const [isSavingTheme, setIsSavingTheme] = useState(false);
     const { status: usernameStatus, formatError } = useUsernameCheck(newUsername);
 
     const hasChanged = newUsername.trim() !== "" && newUsername.trim() !== user?.username;
     const canSave = hasChanged && (usernameStatus === "available") && !formatError;
+    const themeChanged = bgColor !== (user?.bgColor || "#ffffff") || textColor !== (user?.textColor || "#333333");
 
     async function handleSave() {
         if (!canSave) return;
@@ -30,6 +41,21 @@ function ProfileTab() {
             toast.error(error?.response?.data?.message || "Failed to update username");
         } finally {
             setIsSaving(false);
+        }
+    }
+
+    async function handleSaveTheme() {
+        if (!themeChanged) return;
+
+        setIsSavingTheme(true);
+        try {
+            const response = await updateTheme(bgColor, textColor);
+            loginUser(response.data);
+            toast.success("Theme updated successfully");
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to update theme");
+        } finally {
+            setIsSavingTheme(false);
         }
     }
 
@@ -75,6 +101,79 @@ function ProfileTab() {
                 {hasChanged && hint.text && (
                     <p className={styles.hint} style={{ color: hint.color }}>{hint.text}</p>
                 )}
+            </div>
+
+            <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Page Theme</h3>
+                <p className={styles.themeDesc}>Customize your public profile page colors</p>
+
+                <div className={styles.colorGroup}>
+                    <label className={styles.colorLabel}>Background Color</label>
+                    <div className={styles.colorPickerRow}>
+                        <input
+                            type="color"
+                            value={bgColor}
+                            onChange={(e) => setBgColor(e.target.value)}
+                            className={styles.colorInput}
+                        />
+                        <input
+                            type="text"
+                            value={bgColor}
+                            onChange={(e) => setBgColor(e.target.value)}
+                            className={styles.colorText}
+                        />
+                    </div>
+                    <div className={styles.presetRow}>
+                        {PRESET_COLORS.map((c) => (
+                            <button
+                                key={c}
+                                className={`${styles.preset} ${bgColor === c ? styles.presetActive : ""}`}
+                                style={{ background: c }}
+                                onClick={() => setBgColor(c)}
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                <div className={styles.colorGroup}>
+                    <label className={styles.colorLabel}>Text Color</label>
+                    <div className={styles.colorPickerRow}>
+                        <input
+                            type="color"
+                            value={textColor}
+                            onChange={(e) => setTextColor(e.target.value)}
+                            className={styles.colorInput}
+                        />
+                        <input
+                            type="text"
+                            value={textColor}
+                            onChange={(e) => setTextColor(e.target.value)}
+                            className={styles.colorText}
+                        />
+                    </div>
+                    <div className={styles.presetRow}>
+                        {PRESET_COLORS.map((c) => (
+                            <button
+                                key={c}
+                                className={`${styles.preset} ${textColor === c ? styles.presetActive : ""}`}
+                                style={{ background: c }}
+                                onClick={() => setTextColor(c)}
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                <div className={styles.preview} style={{ background: bgColor, color: textColor, border: `1px solid ${textColor}20` }}>
+                    <span className={styles.previewText}>Preview</span>
+                </div>
+
+                <button
+                    className={styles.saveBtn}
+                    onClick={handleSaveTheme}
+                    disabled={!themeChanged || isSavingTheme}
+                >
+                    {isSavingTheme ? "Saving..." : "Save Theme"}
+                </button>
             </div>
 
             <div className={styles.section}>

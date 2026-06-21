@@ -36,6 +36,11 @@ async function updateUserUsername(userId, name) {
     return User.findByIdAndUpdate(userId, { name }, { new: true });
 }
 
+// Updating user theme
+async function updateUserTheme(userId, bgColor, textColor) {
+    return User.findByIdAndUpdate(userId, { bgColor, textColor }, { new: true });
+}
+
 // Exporting user DAO methods
 export {
     createUser,
@@ -45,4 +50,5 @@ export {
     findUserByName,
     updateUserProfilePicture,
     updateUserUsername,
+    updateUserTheme,
 };

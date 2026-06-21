@@ -1,5 +1,5 @@
 // Importing modules
-import { loginService, signupService, checkUsernameService, getImageKitAuth, updateProfilePictureService, updateUsernameService, getCurrentUserService } from "../services/auth.service.js";
+import { loginService, signupService, checkUsernameService, getImageKitAuth, updateProfilePictureService, updateUsernameService, getCurrentUserService, updateThemeService, getPublicUserThemeService } from "../services/auth.service.js";
 import { sanitizeAuthUserResponse } from "../sanitizers/auth.sanitize.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
@@ -69,6 +69,21 @@ const updateUsername = asyncWrapper(async (req, res) => {
     return ApiResponse(res, 200, "Username updated successfully", sanitizeAuthUserResponse(user));
 });
 
+// Updating theme colors
+const updateTheme = asyncWrapper(async (req, res) => {
+    const { bgColor, textColor } = req.body;
+    const user = await updateThemeService(req.user.id, bgColor, textColor);
+
+    return ApiResponse(res, 200, "Theme updated successfully", sanitizeAuthUserResponse(user));
+});
+
+// Getting public user theme by username
+const getPublicUserTheme = asyncWrapper(async (req, res) => {
+    const data = await getPublicUserThemeService(req.params.username);
+
+    return ApiResponse(res, 200, "User theme fetched successfully", data);
+});
+
 // Exporting auth controllers
 export {
     loginUser,
@@ -79,4 +94,6 @@ export {
     getImagekitAuth,
     updateProfilePicture,
     updateUsername,
+    updateTheme,
+    getPublicUserTheme,
 };

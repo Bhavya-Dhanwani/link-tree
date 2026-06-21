@@ -22,6 +22,12 @@
     margin: 0 0 1rem;
 }
 
+.themeDesc {
+    font-size: 0.8rem;
+    color: #888;
+    margin: 0 0 1rem;
+}
+
 .pfpRow {
     display: flex;
     justify-content: center;
@@ -71,6 +77,84 @@
     margin: 0.5rem 0 0;
 }
 
+.colorGroup {
+    margin-bottom: 1.25rem;
+}
+
+.colorLabel {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.colorPickerRow {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.colorInput {
+    width: 40px;
+    height: 36px;
+    border: 1px solid #d0d0d0;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.colorText {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d0d0d0;
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+    font-family: monospace;
+    outline: none;
+}
+
+.colorText:focus {
+    border-color: #4f46e5;
+}
+
+.presetRow {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.preset {
+    width: 24px;
+    height: 24px;
+    border-radius: 0.25rem;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 0.15s;
+}
+
+.preset:hover {
+    border-color: #999;
+}
+
+.presetActive {
+    border-color: #4f46e5;
+}
+
+.preview {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.previewText {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
 .infoRow {
     display: flex;
     justify-content: space-between;
@@ -109,6 +193,11 @@
 
     .inputRow {
         flex-direction: column;
+    }
+
+    .preset {
+        width: 20px;
+        height: 20px;
     }
 
     .infoRow {

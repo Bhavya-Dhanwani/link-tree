@@ -1,6 +1,6 @@
 // Importing modules
 import { Router } from "express";
-import { loginUser, signupUser, getCurrentUser, logoutUser, checkUsername, getImagekitAuth, updateProfilePicture, updateUsername } from "../controllers/auth.controller.js";
+import { loginUser, signupUser, getCurrentUser, logoutUser, checkUsername, getImagekitAuth, updateProfilePicture, updateUsername, updateTheme, getPublicUserTheme } from "../controllers/auth.controller.js";
 import validateErrors from "../middlewares/validateErrors.middleware.js";
 import protect from "../middlewares/auth.middleware.js";
 import { sanitizeLogin, sanitizeSignup } from "../sanitizers/auth.sanitize.js";
@@ -29,6 +29,12 @@ router.put("/profile-picture", protect, updateProfilePicture);
 
 // Updating username (protected)
 router.put("/username", protect, updateUsername);
+
+// Updating theme colors (protected)
+router.put("/theme", protect, updateTheme);
+
+// Getting public user theme by username (public)
+router.get("/user/:username", getPublicUserTheme);
 
 // Logging out user
 router.post("/logout", logoutUser);

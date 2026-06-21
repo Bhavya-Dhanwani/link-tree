@@ -28,7 +28,9 @@ function sanitizeAuthUserResponse(user) {
     return {
         username: user.name,
         email: user.email,
-        profilePicture: user.profilePicture || ""
+        profilePicture: user.profilePicture || "",
+        bgColor: user.bgColor || "#ffffff",
+        textColor: user.textColor || "#333333",
     };
 }
 

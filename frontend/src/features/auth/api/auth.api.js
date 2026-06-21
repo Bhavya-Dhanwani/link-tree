@@ -40,6 +40,16 @@ async function updateUsername(username) {
     return response.data;
 }
 
+async function updateTheme(bgColor, textColor) {
+    const response = await apiClient.put("/auth/theme", { bgColor, textColor });
+    return response.data;
+}
+
+async function getPublicUserTheme(username) {
+    const response = await apiClient.get(`/auth/user/${username}`);
+    return response.data;
+}
+
 export {
     loginUser,
     signupUser,
@@ -49,4 +59,6 @@ export {
     getImagekitAuth,
     updateProfilePicture,
     updateUsername,
+    updateTheme,
+    getPublicUserTheme,
 };

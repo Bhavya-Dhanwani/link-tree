@@ -1,5 +1,5 @@
 // Importing modules
-import { createUser, findUserByEmail, findUserByEmailWithPassword, findUserByName, findUserById, updateUserProfilePicture, updateUserUsername } from "../dao/user.dao.js";
+import { createUser, findUserByEmail, findUserByEmailWithPassword, findUserByName, findUserById, updateUserProfilePicture, updateUserUsername, updateUserTheme } from "../dao/user.dao.js";
 import ApiError from "../utils/ApiError.js";
 import ImageKit from "@imagekit/nodejs";
 import { IMAGEKIT_PRIVATE_KEY } from "../config/env.config.js";
@@ -180,6 +180,37 @@ async function updateUsernameService(userId, newName) {
     return { user, token };
 }
 
+// Updating user theme
+async function updateThemeService(userId, bgColor, textColor) {
+    if (!bgColor || !textColor) {
+        throw new ApiError(400, "Both bgColor and textColor are required");
+    }
+
+    const user = await updateUserTheme(userId, bgColor, textColor);
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return user;
+}
+
+// Getting public user theme by username
+async function getPublicUserThemeService(username) {
+    const user = await findUserByName(username);
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return {
+        username: user.name,
+        profilePicture: user.profilePicture || "",
+        bgColor: user.bgColor || "#ffffff",
+        textColor: user.textColor || "#333333",
+    };
+}
+
 // Exporting auth services
 export {
     loginService,
@@ -189,4 +220,6 @@ export {
     updateProfilePictureService,
     updateUsernameService,
     getCurrentUserService,
+    updateThemeService,
+    getPublicUserThemeService,
 };

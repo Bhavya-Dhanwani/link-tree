@@ -30,6 +30,14 @@ const userSchema = new mongoose.Schema(
             type : String,
             default : ""
         },
+        bgColor : {
+            type : String,
+            default : "#ffffff"
+        },
+        textColor : {
+            type : String,
+            default : "#333333"
+        },
     },
     {
         timestamps : true

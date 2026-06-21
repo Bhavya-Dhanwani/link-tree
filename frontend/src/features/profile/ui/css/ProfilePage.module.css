@@ -1,7 +1,12 @@
 .container {
+    width: 100%;
+    min-height: 100vh;
+    padding: 0 1rem;
+}
+
+.inner {
     max-width: 600px;
     margin: 0 auto;
-    padding: 0 1rem;
 }
 
 .header {
@@ -91,6 +96,10 @@
 @media (max-width: 320px) {
     .container {
         padding: 0 0.75rem;
+    }
+
+    .inner {
+        max-width: 100%;
     }
 
     .logo {
