@@ -39,11 +39,28 @@ function getPlatformFromUrl(url) {
 
 function getFaviconUrl(url) {
     try {
-        const hostname = new URL(url).hostname;
-        return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
+        const parsedUrl = new URL(url);
+        return `${parsedUrl.origin}/favicon.ico`;
     } catch {
         return null;
     }
+}
+
+function getFallbackFaviconUrl(url) {
+    try {
+        return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(url)}&sz=64`;
+    } catch {
+        return null;
+    }
+}
+
+function handleFaviconError(event, url) {
+    const fallback = getFallbackFaviconUrl(url);
+    if (fallback && event.currentTarget.src !== fallback) {
+        event.currentTarget.src = fallback;
+        return;
+    }
+    event.currentTarget.style.display = "none";
 }
 
 function getApiErrorMessage(error) {
@@ -58,8 +75,9 @@ function ViewLinks() {
     const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
     const isPremium = isAdmin || hasActiveSubscription;
     const [dragIndex, setDragIndex] = useState(null);
-    const [editingColor, setEditingColor] = useState(null);
+    const [styleModal, setStyleModal] = useState(null);
     const [colorValue, setColorValue] = useState("#4f46e5");
+    const [iconValue, setIconValue] = useState("");
     const dragItem = useRef(null);
     const dragOverItem = useRef(null);
 
@@ -87,6 +105,20 @@ function ViewLinks() {
         loadLinks();
     }, []);
 
+    function openColorModal(link) {
+        setColorValue(link.borderColor || "#4f46e5");
+        setStyleModal({ type: "color", link });
+    }
+
+    function openIconModal(link) {
+        setIconValue(link.customIcon || "");
+        setStyleModal({ type: "icon", link });
+    }
+
+    function closeStyleModal() {
+        setStyleModal(null);
+    }
+
     async function handleSoftDelete(linkId) {
         try {
             await deleteLink(linkId);
@@ -97,14 +129,37 @@ function ViewLinks() {
         }
     }
 
-    async function handleColorSave(linkId) {
-        if (!isPremium) return;
+    async function handleColorSave() {
+        if (!isPremium || !styleModal?.link) return;
 
         try {
-            await updateLinkStyle(linkId, { borderColor: colorValue });
-            setLinks((prev) => prev.map((l) => l._id === linkId ? { ...l, borderColor: colorValue } : l));
-            setEditingColor(null);
+            await updateLinkStyle(styleModal.link._id, { borderColor: colorValue });
+            setLinks((prev) => prev.map((l) => l._id === styleModal.link._id ? { ...l, borderColor: colorValue } : l));
+            closeStyleModal();
             toast.success("Border color updated");
+        } catch (error) {
+            toast.error(getApiErrorMessage(error));
+        }
+    }
+
+    async function handleIconSave() {
+        if (!isPremium || !styleModal?.link) return;
+
+        const nextIcon = iconValue.trim();
+        if (nextIcon) {
+            try {
+                new URL(nextIcon);
+            } catch {
+                toast.error("Enter a valid image URL");
+                return;
+            }
+        }
+
+        try {
+            await updateLinkStyle(styleModal.link._id, { customIcon: nextIcon });
+            setLinks((prev) => prev.map((l) => l._id === styleModal.link._id ? { ...l, customIcon: nextIcon } : l));
+            closeStyleModal();
+            toast.success(nextIcon ? "Icon updated" : "Icon removed");
         } catch (error) {
             toast.error(getApiErrorMessage(error));
         }
@@ -174,112 +229,134 @@ function ViewLinks() {
     if (links.length === 0) return <p className={styles.empty}>No links yet. Add one!</p>;
 
     return (
-        <div className={styles.container}>
-            {links.map((link, index) => {
-                const platform = isPremium ? getPlatformFromUrl(link.url) : null;
-                const favicon = isPremium ? getFaviconUrl(link.url) : null;
-                const platformColor = platform ? PLATFORM_ICONS[platform] : null;
-                const borderCol = isPremium ? (link.borderColor || "#e0e0e0") : "#e0e0e0";
+        <>
+            <div className={styles.container}>
+                {links.map((link, index) => {
+                    const platform = isPremium ? getPlatformFromUrl(link.url) : null;
+                    const favicon = isPremium ? getFaviconUrl(link.url) : null;
+                    const platformColor = platform ? PLATFORM_ICONS[platform] : null;
+                    const borderCol = isPremium ? (link.borderColor || "#e0e0e0") : "#e0e0e0";
 
-                return (
-                    <div
-                        key={link._id}
-                        className={`${styles.card} ${dragIndex === index ? styles.dragging : ""}`}
-                        style={{ borderLeft: `4px solid ${borderCol}` }}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, index)}
-                        onDragOver={(e) => handleDragOver(e, index)}
-                        onDrop={handleDrop}
-                        onDragEnd={handleDragEnd}
-                    >
-                        <div className={styles.handle} title="Drag to reorder">
-                            &#9776;
-                        </div>
-                        <span className={styles.sr}>{index + 1}</span>
-
-                        {favicon ? (
-                            <img src={favicon} alt="" width={20} height={20} style={{ borderRadius: 4, flexShrink: 0 }} />
-                        ) : platformColor ? (
-                            <div style={{
-                                width: 20, height: 20, borderRadius: 4, flexShrink: 0,
-                                background: platformColor, display: "flex",
-                                alignItems: "center", justifyContent: "center",
-                                color: "#fff", fontSize: 10, fontWeight: 700,
-                            }}>
-                                {(platform || "?")[0].toUpperCase()}
+                    return (
+                        <div
+                            key={link._id}
+                            className={`${styles.card} ${dragIndex === index ? styles.dragging : ""}`}
+                            style={{ borderLeft: `4px solid ${borderCol}` }}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDrop={handleDrop}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <div className={styles.handle} title="Drag to reorder">
+                                &#9776;
                             </div>
-                        ) : null}
+                            <span className={styles.sr}>{index + 1}</span>
 
-                        <div className={styles.info}>
-                            <h3 className={styles.title}>{link.title}</h3>
-                            <p className={styles.url}>{link.url}</p>
-                        </div>
+                            {link.customIcon ? (
+                                <img src={link.customIcon} alt="" width={20} height={20} onError={(event) => handleFaviconError(event, link.url)} style={{ borderRadius: 4, flexShrink: 0, objectFit: "cover" }} />
+                            ) : favicon ? (
+                                <img src={favicon} alt="" width={20} height={20} onError={(event) => handleFaviconError(event, link.url)} style={{ borderRadius: 4, flexShrink: 0 }} />
+                            ) : platformColor ? (
+                                <div style={{
+                                    width: 20, height: 20, borderRadius: 4, flexShrink: 0,
+                                    background: platformColor, display: "flex",
+                                    alignItems: "center", justifyContent: "center",
+                                    color: "#fff", fontSize: 10, fontWeight: 700,
+                                }}>
+                                    {(platform || "?")[0].toUpperCase()}
+                                </div>
+                            ) : null}
 
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                            {isPremium && (
-                                <>
-                                    <button
-                                        onClick={() => handleToggleHighlight(link._id, link.isHighlighted)}
-                                        style={{
-                                            padding: "4px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600,
-                                            cursor: "pointer", border: "none",
-                                            background: link.isHighlighted ? "#f59e0b" : "#f1f5f9",
-                                            color: link.isHighlighted ? "#fff" : "#64718a",
-                                        }}
-                                        title={link.isHighlighted ? "Remove highlight" : "Highlight this link"}
-                                    >
-                                        {link.isHighlighted ? "Featured" : "Feature"}
-                                    </button>
-                                    {editingColor === link._id ? (
-                                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                            <input
-                                                type="color"
-                                                value={colorValue}
-                                                onChange={(e) => setColorValue(e.target.value)}
-                                                style={{ width: 28, height: 28, border: "none", padding: 0, cursor: "pointer", borderRadius: 4 }}
-                                            />
-                                            <button
-                                                onClick={() => handleColorSave(link._id)}
-                                                style={{
-                                                    padding: "4px 8px", border: "none", borderRadius: 4,
-                                                    background: "#22c55e", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer",
-                                                }}
-                                            >
-                                                Save
-                                            </button>
-                                            <button
-                                                onClick={() => setEditingColor(null)}
-                                                style={{
-                                                    padding: "4px 8px", border: "1px solid #e2e8f0", borderRadius: 4,
-                                                    background: "#fff", fontSize: 11, cursor: "pointer",
-                                                }}
-                                            >
-                                                X
-                                            </button>
-                                        </div>
-                                    ) : (
+                            <div className={styles.info}>
+                                <h3 className={styles.title}>{link.title}</h3>
+                                <p className={styles.url}>{link.url}</p>
+                            </div>
+
+                            <div className={styles.actions}>
+                                {isPremium && (
+                                    <>
                                         <button
-                                            onClick={() => { setEditingColor(link._id); setColorValue(link.borderColor || "#4f46e5"); }}
-                                            style={{
-                                                width: 24, height: 24, borderRadius: 6, border: `2px solid ${borderCol}`,
-                                                background: borderCol, cursor: "pointer", padding: 0,
-                                            }}
+                                            onClick={() => handleToggleHighlight(link._id, link.isHighlighted)}
+                                            className={styles.featureBtn}
+                                            style={link.isHighlighted ? { background: "#f59e0b", color: "#fff" } : undefined}
+                                            title={link.isHighlighted ? "Remove highlight" : "Highlight this link"}
+                                        >
+                                            {link.isHighlighted ? "Featured" : "Feature"}
+                                        </button>
+                                        <button onClick={() => openIconModal(link)} className={styles.iconBtn} title="Change icon image URL">
+                                            Icon
+                                        </button>
+                                        <button
+                                            onClick={() => openColorModal(link)}
+                                            className={styles.colorBtn}
+                                            style={{ background: borderCol, borderColor: borderCol }}
                                             title="Change border color"
                                         />
-                                    )}
-                                </>
-                            )}
-                            <button
-                                className={styles.deleteBtn}
-                                onClick={() => handleSoftDelete(link._id)}
-                            >
-                                Delete
-                            </button>
+                                    </>
+                                )}
+                                <button className={styles.deleteBtn} onClick={() => handleSoftDelete(link._id)}>
+                                    Delete
+                                </button>
+                            </div>
                         </div>
+                    );
+                })}
+            </div>
+
+            {styleModal && (
+                <div className={styles.modalOverlay} onClick={closeStyleModal}>
+                    <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
+                        <button className={styles.modalClose} onClick={closeStyleModal}>x</button>
+                        <h3 className={styles.modalTitle}>
+                            {styleModal.type === "icon" ? "Change Icon" : "Change Color"}
+                        </h3>
+                        <p className={styles.modalSubtitle}>{styleModal.link.title}</p>
+
+                        {styleModal.type === "icon" ? (
+                            <>
+                                <label className={styles.modalLabel} htmlFor="customIcon">Image URL</label>
+                                <input
+                                    id="customIcon"
+                                    type="url"
+                                    value={iconValue}
+                                    onChange={(event) => setIconValue(event.target.value)}
+                                    placeholder="https://example.com/icon.png"
+                                    className={styles.modalInput}
+                                />
+                                <div className={styles.modalActions}>
+                                    <button className={styles.secondaryBtn} onClick={() => setIconValue("")}>Clear</button>
+                                    <button className={styles.primaryBtn} onClick={handleIconSave}>Save Icon</button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <label className={styles.modalLabel} htmlFor="borderColor">Border Color</label>
+                                <div className={styles.colorPickerRow}>
+                                    <input
+                                        id="borderColor"
+                                        type="color"
+                                        value={colorValue}
+                                        onChange={(event) => setColorValue(event.target.value)}
+                                        className={styles.modalColorInput}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={colorValue}
+                                        onChange={(event) => setColorValue(event.target.value)}
+                                        className={styles.modalInput}
+                                    />
+                                </div>
+                                <div className={styles.modalActions}>
+                                    <button className={styles.secondaryBtn} onClick={closeStyleModal}>Cancel</button>
+                                    <button className={styles.primaryBtn} onClick={handleColorSave}>Save Color</button>
+                                </div>
+                            </>
+                        )}
                     </div>
-                );
-            })}
-        </div>
+                </div>
+            )}
+        </>
     );
 }
 

@@ -54,11 +54,28 @@ function getPlatformFromUrl(url) {
 
 function getFaviconUrl(url) {
     try {
-        const hostname = new URL(url).hostname;
-        return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
+        const parsedUrl = new URL(url);
+        return `${parsedUrl.origin}/favicon.ico`;
     } catch {
         return null;
     }
+}
+
+function getFallbackFaviconUrl(url) {
+    try {
+        return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(url)}&sz=64`;
+    } catch {
+        return null;
+    }
+}
+
+function handleFaviconError(event, url) {
+    const fallback = getFallbackFaviconUrl(url);
+    if (fallback && event.currentTarget.src !== fallback) {
+        event.currentTarget.src = fallback;
+        return;
+    }
+    event.currentTarget.style.display = "none";
 }
 
 function ProfileLinkCard({ link, textColor, isPremium }) {
@@ -130,12 +147,12 @@ function ProfileLinkCard({ link, textColor, isPremium }) {
             <div style={{ display: "flex", alignItems: "center", gap: isHighlighted ? 14 : 10 }}>
                 {link.customIcon ? (
                     <img src={link.customIcon} alt="" width={isHighlighted ? 32 : 20} height={isHighlighted ? 32 : 20} style={{ borderRadius: 6 }} />
+                ) : favicon ? (
+                    <img src={favicon} alt="" width={isHighlighted ? 32 : 20} height={isHighlighted ? 32 : 20} onError={(event) => handleFaviconError(event, link.url)} style={{ borderRadius: 6 }} />
                 ) : iconData ? (
                     <svg width={isHighlighted ? 32 : 20} height={isHighlighted ? 32 : 20} viewBox="0 0 24 24" fill={iconData.color}>
                         <path d={iconData.svg} />
                     </svg>
-                ) : favicon ? (
-                    <img src={favicon} alt="" width={isHighlighted ? 32 : 20} height={isHighlighted ? 32 : 20} style={{ borderRadius: 6 }} />
                 ) : null}
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <h3 className={styles.linkTitle} style={{
@@ -151,3 +168,4 @@ function ProfileLinkCard({ link, textColor, isPremium }) {
 }
 
 export default ProfileLinkCard;
+

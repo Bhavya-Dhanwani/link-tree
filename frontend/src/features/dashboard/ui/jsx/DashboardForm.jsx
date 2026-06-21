@@ -52,11 +52,28 @@ function getPlatformFromUrl(url) {
 
 function getFaviconUrl(url) {
     try {
-        const hostname = new URL(url).hostname;
-        return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
+        const parsedUrl = new URL(url);
+        return `${parsedUrl.origin}/favicon.ico`;
     } catch {
         return null;
     }
+}
+
+function getFallbackFaviconUrl(url) {
+    try {
+        return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(url)}&sz=64`;
+    } catch {
+        return null;
+    }
+}
+
+function handleFaviconError(event, url) {
+    const fallback = getFallbackFaviconUrl(url);
+    if (fallback && event.currentTarget.src !== fallback) {
+        event.currentTarget.src = fallback;
+        return;
+    }
+    event.currentTarget.style.display = "none";
 }
 
 function DashboardForm() {
@@ -124,7 +141,7 @@ function DashboardForm() {
                             borderRadius: 8, background: "#fff",
                         }}>
                             {favicon ? (
-                                <img src={favicon} alt="" width={20} height={20} style={{ borderRadius: 4 }} />
+                                <img src={favicon} alt="" width={20} height={20} onError={(event) => handleFaviconError(event, form.url)} style={{ borderRadius: 4 }} />
                             ) : (
                                 <div style={{
                                     width: 20, height: 20, borderRadius: 4,
@@ -167,6 +184,7 @@ function DashboardForm() {
 }
 
 export default DashboardForm;
+
 
 
 

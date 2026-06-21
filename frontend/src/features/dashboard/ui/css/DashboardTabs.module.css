@@ -8,6 +8,7 @@
     border-radius: 0.5rem;
     background: transparent;
     overflow-x: auto;
+    max-width: calc(100vw - 1rem);
     -webkit-overflow-scrolling: touch;
 }
 
@@ -48,6 +49,20 @@
     background: #4338ca;
 }
 
+
+@media (max-width: 640px) {
+    .tabs {
+        justify-content: flex-start;
+        margin: 0.75rem 0.5rem 0;
+        padding: 0.5rem;
+        gap: 0.4rem;
+    }
+
+    .tab {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.78rem;
+    }
+}
 @media (max-width: 320px) {
     .tabs {
         margin: 0.75rem 0.5rem 0;
@@ -60,3 +75,4 @@
         font-size: 0.75rem;
     }
 }
+
